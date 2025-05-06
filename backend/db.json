@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "name": "Suíte Presidencial Vista Mar",
+    "price": 1250,
+    "capacity": 4,
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Banheira", "Cozinha Compacta", "Vista para o Mar", "Piscina Privativa"]
+  },
+  {
+    "id": 2,
+    "name": "Quarto Duplo Standard",
+    "price": 350,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo"]
+  },
+  {
+    "id": 3,
+    "name": "Quarto Família Conectado",
+    "price": 700,
+    "capacity": 5,
+    "features": ["Wi-Fi", "Ar-condicionado", "Frigobar", "TV a Cabo", "Dois Banheiros"]
+  },
+  {
+    "id": 4,
+    "name": "Quarto Individual Econômico",
+    "price": 180,
+    "capacity": 1,
+    "features": ["Wi-Fi", "Ventilador"]
+  },
+  {
+    "id": 5,
+    "name": "Suíte Master com Hidromassagem",
+    "price": 950,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Banheira de Hidromassagem", "Varanda", "Frigobar", "Vista para a Montanha"]
+  },
+  {
+    "id": 6,
+    "name": "Bangalô Sobre as Águas",
+    "price": 1500,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Piscina Privativa", "Acesso direto ao mar", "Serviço de Quarto 24h"]
+  },
+  {
+    "id": 7,
+    "name": "Quarto Triplo Superior",
+    "price": 550,
+    "capacity": 3,
+    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Frigobar"]
+  },
+  {
+    "id": 8,
+    "name": "Cabana Rústica na Floresta",
+    "price": 420,
+    "capacity": 2,
+    "features": ["Lareira", "Cozinha Equipada", "Sem Wi-Fi"]
+  },
+  {
+    "id": 9,
+    "name": "Apartamento Luxo com Cozinha",
+    "price": 880,
+    "capacity": 4,
+    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Completa", "Máquina de Lavar", "Varanda Ampla"]
+  },
+  {
+    "id": 10,
+    "name": "Loft Moderno",
+    "price": 400,
+    "capacity": 3,
+    "features": ["Wi-Fi", "Ar-condicionado"]
+  },
+  {
+    "id": 11,
+    "name": "Estúdio Moderno Centro da Cidade",
+    "price": 400,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Compacta", "Smart TV"]
+  },
+  {
+    "id": 12,
+    "name": "Quarto Acessível (PCD)",
+    "price": 360,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Barras de Apoio", "Portas Largas", "Chuveiro Acessível"]
+  },
+  {
+    "id": 13,
+    "name": "Suíte Júnior com Sala de Estar",
+    "price": 720,
+    "capacity": 3,
+    "features": ["Wi-Fi", "Ar-condicionado", "Sala de Estar Separada", "Sofá-cama", "Frigobar"]
+  },
+  {
+    "id": 14,
+    "name": "Quarto Casal Vista Jardim",
+    "price": 480,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para o Jardim"]
+  },
+  {
+    "id": 15,
+    "name": "Dormitório Compartilhado (Hostel)",
+    "price": 90,
+    "capacity": 8,
+    "features": ["Wi-Fi", "Armários Individuais", "Banheiro Compartilhado"]
+  },
+  {
+    "id": 16,
+    "name": "Suíte Lua de Mel Romântica",
+    "price": 1100,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Decoração Romântica", "Banheira Dupla", "Champanhe Cortesia", "Vista Panorâmica"]
+  },
+  {
+    "id": 17,
+    "name": "Quarto Standard com Café da Manhã",
+    "price": 390,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã Incluso"]
+  },
+  {
+    "id": 18,
+    "name": "Quarto com Beliche Econômico",
+    "price": 220,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ventilador", "Beliche"]
+  },
+  {
+    "id": 19,
+    "name": "Penthouse Exclusiva",
+    "price": 2500,
+    "capacity": 6,
+    "features": ["Wi-Fi", "Ar-condicionado Central", "Piscina na Cobertura", "Cozinha Gourmet", "Elevador Privativo", "Vista 360º"]
+  },
+  {
+    "id": 20,
+    "name": "Quarto Duplo Vista Piscina",
+    "price": 520,
+    "capacity": 2,
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para a Piscina", "Frigobar"]
+  }
+] 
