@@ -6,9 +6,10 @@ const NodeCache = require('node-cache');
 const app = express();
 const port = process.env.PORT || 3001; // Porta para o backend
 
-// Configurar CORS para permitir requisições do frontend (ajuste a origin conforme necessário)
+// Configurar CORS para permitir requisições do frontend
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
-  origin: 'http://localhost:3000' // Endereço do seu frontend Next.js
+  origin: frontendUrl
 }));
 
 // Servir arquivos estáticos da pasta 'public'
@@ -20,7 +21,7 @@ const cache = new NodeCache({ stdTTL: 300 });
 // Carregar dados dos quartos do JSON
 let allRooms = [];
 try {
-  const rawData = fs.readFileSync('db.json');
+  const rawData = fs.readFileSync('db.json', 'utf8');
   allRooms = JSON.parse(rawData);
   console.log(`Carregados ${allRooms.length} quartos do db.json`);
 } catch (error) {
