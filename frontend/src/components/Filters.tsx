@@ -27,11 +27,10 @@ const Filters: React.FC = () => {
   const [localName, setLocalName] = useState(storeName || '');
 
   useEffect(() => {
-    // Evita atualizações desnecessárias do localName e interferências durante digitação
     if (storeName !== localName && (storeName !== undefined || localName !== '')) {
       setLocalName(storeName || '');
     }
-  }, [storeName]); // Depender apenas de storeName para esta sincronização
+  }, [storeName, localName]); // localName adicionado como dependência
 
   // --- Lógica de Debounce para Atualizar a Store Zustand ---
   // Função que realmente chama setFilters na store

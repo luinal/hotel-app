@@ -55,7 +55,9 @@ const PaginationControls: React.FC = () => {
   const getPageButtons = () => {
     const buttons = [];
     const maxPagesToShow = 5; // Máximo de botões de página visíveis
+    // eslint-disable-next-line prefer-const
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    // eslint-disable-next-line prefer-const
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage + 1 < maxPagesToShow) {

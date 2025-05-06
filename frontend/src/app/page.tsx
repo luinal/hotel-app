@@ -18,8 +18,8 @@ function SearchPageContent() {
   // Seletores para obter o estado e as ações da store Zustand
   const {
     name, priceMin, priceMax, capacity, features, page,
-    rooms, pagination, isLoading, error,
-    setFilters, setPage, setRoomsLoadingError, clearFilters
+    setFilters,
+    setRoomsLoadingError
   } = useFilterStore();
 
   // --- Efeito 1: Inicialização dos Filtros a partir da URL --- //
@@ -27,11 +27,9 @@ function SearchPageContent() {
   // Lê os parâmetros da URL e atualiza o estado Zustand se houver divergência.
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
-    // Objeto para acumular as atualizações do estado baseadas na URL
     const initialUpdate: Parameters<typeof setFilters>[0] = {};
-    let needsUpdate = false; // Flag para evitar chamadas desnecessárias a setFilters
+    let needsUpdate = false;
 
-    // Verifica cada filtro possível na URL e compara com o estado atual
     if (params.has('name') && params.get('name') !== name) {
       initialUpdate.name = params.get('name')!;
       needsUpdate = true;
@@ -56,31 +54,24 @@ function SearchPageContent() {
       }
     }
 
-    // Verifica as features na URL
     const featureUpdate: { [key: string]: boolean } = {};
     let featureChanged = false;
     Object.keys(availableFeatures).forEach(key => {
       const paramValue = params.get(key) === 'true';
-      // Verifica se o parâmetro existe e se o valor na URL é diferente do estado
       if (params.has(key) && paramValue !== features[key]) {
           featureUpdate[key] = paramValue;
           featureChanged = true;
       }
     });
-    // Se alguma feature mudou, adiciona ao objeto de atualização
     if (featureChanged) {
-        // Combina as features existentes com as atualizadas da URL
         initialUpdate.features = { ...features, ...featureUpdate };
         needsUpdate = true;
     }
 
-    // Se algum parâmetro da URL for diferente do estado inicial, atualiza a store
     if (needsUpdate) {
-      console.log('Initializing filters from URL:', initialUpdate);
-      setFilters(initialUpdate); // Atualiza o estado Zustand
+      setFilters(initialUpdate);
     }
-  // A dependência vazia [] garante que este efeito rode apenas na montagem inicial.
-  }, []);
+  }, [searchParams, name, priceMin, priceMax, capacity, features, page, setFilters]);
 
   // --- Efeito 2: Atualização da URL a partir dos Filtros --- //
   // Executa sempre que qualquer filtro (name, priceMin, etc.) ou a página mudar no estado Zustand.
@@ -144,9 +135,15 @@ function SearchPageContent() {
         const data = await response.json();
         roomsData = data.rooms;
         paginationData = data.pagination;
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error("Failed to fetch rooms:", e);
-        errorData = e.message || 'Falha ao buscar quartos.';
+        let errorMessage = 'Falha ao buscar quartos.';
+        if (e instanceof Error) {
+          errorMessage = e.message;
+        } else if (typeof e === 'string') {
+          errorMessage = e;
+        }
+        errorData = errorMessage;
       }
 
       const elapsedTime = Date.now() - startTime;
