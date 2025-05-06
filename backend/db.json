@@ -4,139 +4,159 @@
     "name": "Suíte Presidencial Vista Mar",
     "price": 1250,
     "capacity": 4,
-    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Banheira", "Cozinha Compacta", "Vista para o Mar", "Piscina Privativa"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Banheira", "Cozinha Compacta", "Vista para o Mar", "Piscina Privativa"],
+    "imageUrl": "/images/rooms/Suíte Presidencial Vista Mar.jpg"
   },
   {
     "id": 2,
     "name": "Quarto Duplo Standard",
     "price": 350,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo"]
+    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Quarto Duplo Standard.jpg"
   },
   {
     "id": 3,
     "name": "Quarto Família Conectado",
     "price": 700,
     "capacity": 5,
-    "features": ["Wi-Fi", "Ar-condicionado", "Frigobar", "TV a Cabo", "Dois Banheiros"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Frigobar", "TV a Cabo", "Dois Banheiros", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Quarto Família Conectado.jpg"
   },
   {
     "id": 4,
     "name": "Quarto Individual Econômico",
     "price": 180,
     "capacity": 1,
-    "features": ["Wi-Fi", "Ventilador"]
+    "features": ["Wi-Fi", "Ventilador"],
+    "imageUrl": "/images/rooms/Quarto Individual Econômico.jpg"
   },
   {
     "id": 5,
     "name": "Suíte Master com Hidromassagem",
     "price": 950,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Banheira de Hidromassagem", "Varanda", "Frigobar", "Vista para a Montanha"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Banheira de Hidromassagem", "Varanda", "Frigobar", "Vista para a Montanha", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Suíte Master com Hidromassagem.jpg"
   },
   {
     "id": 6,
     "name": "Bangalô Sobre as Águas",
     "price": 1500,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Piscina Privativa", "Acesso direto ao mar", "Serviço de Quarto 24h"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Piscina Privativa", "Acesso direto ao mar", "Serviço de Quarto 24h", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Bangalô Sobre as Águas.jpeg"
   },
   {
     "id": 7,
     "name": "Quarto Triplo Superior",
     "price": 550,
     "capacity": 3,
-    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Frigobar"]
+    "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Frigobar"],
+    "imageUrl": "/images/rooms/Quarto Triplo Superior.jpg"
   },
   {
     "id": 8,
     "name": "Cabana Rústica na Floresta",
     "price": 420,
     "capacity": 2,
-    "features": ["Lareira", "Cozinha Equipada", "Sem Wi-Fi"]
+    "features": ["Lareira", "Cozinha Equipada", "Sem Wi-Fi", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Cabana Rústica na Floresta.jpg"
   },
   {
     "id": 9,
     "name": "Apartamento Luxo com Cozinha",
     "price": 880,
     "capacity": 4,
-    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Completa", "Máquina de Lavar", "Varanda Ampla"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Completa", "Máquina de Lavar", "Varanda Ampla"],
+    "imageUrl": "/images/rooms/Apartamento Luxo com Cozinha.jpg"
   },
   {
     "id": 10,
     "name": "Loft Moderno",
     "price": 400,
     "capacity": 3,
-    "features": ["Wi-Fi", "Ar-condicionado"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Loft Moderno.jpg"
   },
   {
     "id": 11,
     "name": "Estúdio Moderno Centro da Cidade",
     "price": 400,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Compacta", "Smart TV"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Compacta", "Smart TV"],
+    "imageUrl": "/images/rooms/Estúdio Moderno Centro da Cidade.jpg"
   },
   {
     "id": 12,
     "name": "Quarto Acessível (PCD)",
     "price": 360,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Barras de Apoio", "Portas Largas", "Chuveiro Acessível"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Barras de Apoio", "Portas Largas", "Chuveiro Acessível"],
+    "imageUrl": "/images/rooms/Quarto Acessível (PCD) 1.jpg"
   },
   {
     "id": 13,
     "name": "Suíte Júnior com Sala de Estar",
     "price": 720,
     "capacity": 3,
-    "features": ["Wi-Fi", "Ar-condicionado", "Sala de Estar Separada", "Sofá-cama", "Frigobar"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Sala de Estar Separada", "Sofá-cama", "Frigobar", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Suíte Júnior com Sala de Estar.jpg"
   },
   {
     "id": 14,
     "name": "Quarto Casal Vista Jardim",
     "price": 480,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para o Jardim"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para o Jardim"],
+    "imageUrl": "/images/rooms/Quarto Casal Vista Jardim.jpg"
   },
   {
     "id": 15,
     "name": "Dormitório Compartilhado (Hostel)",
     "price": 90,
     "capacity": 8,
-    "features": ["Wi-Fi", "Armários Individuais", "Banheiro Compartilhado"]
+    "features": ["Wi-Fi", "Armários Individuais", "Banheiro Compartilhado", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Dormitório Compartilhado (Hostel).jpg"
   },
   {
     "id": 16,
     "name": "Suíte Lua de Mel Romântica",
     "price": 1100,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Decoração Romântica", "Banheira Dupla", "Champanhe Cortesia", "Vista Panorâmica"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Decoração Romântica", "Banheira Dupla", "Champanhe Cortesia", "Vista Panorâmica"],
+    "imageUrl": "/images/rooms/Suíte Lua de Mel Romântica.jpg"
   },
   {
     "id": 17,
     "name": "Quarto Standard com Café da Manhã",
     "price": 390,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã Incluso"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã Incluso", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Quarto Standard com Café da Manhã.jpg"
   },
   {
     "id": 18,
     "name": "Quarto com Beliche Econômico",
     "price": 220,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ventilador", "Beliche"]
+    "features": ["Wi-Fi", "Ventilador", "Beliche"],
+    "imageUrl": "/images/rooms/Quarto com Beliche Econômico.jpg"
   },
   {
     "id": 19,
     "name": "Penthouse Exclusiva",
     "price": 2500,
     "capacity": 6,
-    "features": ["Wi-Fi", "Ar-condicionado Central", "Piscina na Cobertura", "Cozinha Gourmet", "Elevador Privativo", "Vista 360º"]
+    "features": ["Wi-Fi", "Ar-condicionado Central", "Piscina na Cobertura", "Cozinha Gourmet", "Elevador Privativo", "Vista 360º", "Café da Manhã"],
+    "imageUrl": "/images/rooms/Penthouse Exclusiva.jpg"
   },
   {
     "id": 20,
     "name": "Quarto Duplo Vista Piscina",
     "price": 520,
     "capacity": 2,
-    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para a Piscina", "Frigobar"]
+    "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para a Piscina", "Frigobar"],
+    "imageUrl": "/images/rooms/Quarto Duplo Vista Piscina.jpg"
   }
 ] 

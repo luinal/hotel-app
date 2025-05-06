@@ -11,6 +11,9 @@ app.use(cors({
   origin: 'http://localhost:3000' // Endereço do seu frontend Next.js
 }));
 
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static('public'));
+
 // Cache em memória com TTL (Time To Live) de 5 minutos
 const cache = new NodeCache({ stdTTL: 300 });
 
@@ -35,7 +38,7 @@ const featureMap = {
   cozinha: 'Cozinha Compacta',
   banheira: 'Banheira',
   lareira: 'Lareira',
-  rate: 'Avaliação',
+  cafe: 'Café da Manhã',
 };
 
 // Rota GET /rooms
