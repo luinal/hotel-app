@@ -7,6 +7,7 @@ import RoomList from '@/components/RoomList';
 import Filters from '@/components/Filters';
 import RoomCount from '@/components/RoomCount';
 import PaginationControls from '@/components/PaginationControls';
+import SortControls from '@/components/SortControls';
 
 // Componente interno para encapsular a lógica que depende dos hooks de navegação,
 // permitindo o uso de Suspense na página principal.
@@ -22,8 +23,10 @@ function SearchPageContent() {
   // Seletores para obter o estado e as ações da store Zustand
   const {
     name, priceMin, priceMax, capacity, features, page,
+    orderBy, orderDirection,
     setFilters,
-    setRoomsLoadingError
+    setRoomsLoadingError,
+    setOrder
   } = useFilterStore();
 
   // --- Efeito 1: Inicialização dos Filtros a partir da URL --- //
@@ -86,6 +89,20 @@ function SearchPageContent() {
       needsUpdate = true;
     }
 
+    // Verifica os parâmetros de ordenação
+    if (params.has('orderBy')) {
+      const urlOrderBy = params.get('orderBy')!;
+      // Verifica se o valor é um dos valores válidos de orderBy
+      if (['name', 'price', 'capacity', ''].includes(urlOrderBy) && urlOrderBy !== orderBy) {
+        initialUpdate.orderBy = urlOrderBy as 'name' | 'price' | 'capacity' | '';
+        needsUpdate = true;
+      }
+    }
+    if (params.has('orderDirection') && params.get('orderDirection') !== orderDirection) {
+      initialUpdate.orderDirection = params.get('orderDirection') === 'desc' ? 'desc' : 'asc';
+      needsUpdate = true;
+    }
+
     if (needsUpdate) {
       setFilters(initialUpdate);
     }
@@ -94,7 +111,7 @@ function SearchPageContent() {
     setTimeout(() => {
       isUpdatingFromUrl.current = false;
     }, 0);
-  }, [searchParams, name, priceMin, priceMax, capacity, features, page, setFilters]);
+  }, [searchParams, name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, setFilters]);
 
   // --- Efeito 2: Atualização da URL a partir dos Filtros --- //
   // Executa sempre que qualquer filtro (name, priceMin, etc.) ou a página mudar no estado Zustand.
@@ -114,6 +131,10 @@ function SearchPageContent() {
       if (value) params.set(key, 'true'); // Adiciona apenas features ativas
     });
     if (page > 1) params.set('page', page.toString()); // Adiciona página se não for a primeira
+    if (orderBy) {
+      params.set('orderBy', orderBy);
+      params.set('orderDirection', orderDirection);
+    }
 
     // Pega os parâmetros atuais da URL para comparação
     const currentParams = new URLSearchParams(searchParams.toString());
@@ -132,7 +153,7 @@ function SearchPageContent() {
 
   // Dependências do efeito: monitora todas as variáveis de filtro e página do Zustand.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, priceMin, priceMax, capacity, features, page, pathname, router]);
+  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, pathname, router]);
 
   // --- Efeito 3: Busca de Dados da API --- //
   // Executa sempre que os filtros ou a página mudam (após os efeitos anteriores).
@@ -151,6 +172,10 @@ function SearchPageContent() {
       });
       params.set('page', page.toString());
       params.set('limit', '10');
+      if (orderBy) {
+        params.set('orderBy', orderBy);
+        params.set('orderDirection', orderDirection);
+      }
 
       let roomsData = [];
       let paginationData = null;
@@ -192,7 +217,7 @@ function SearchPageContent() {
 
     fetchData();
   // Dependências: busca novamente sempre que um filtro relevante ou a página mudar.
-  }, [name, priceMin, priceMax, capacity, features, page, setRoomsLoadingError]);
+  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, setRoomsLoadingError]);
 
   // Renderização da UI principal, dividida em filtros (aside) e resultados (main)
   return (
@@ -208,7 +233,7 @@ function SearchPageContent() {
         <main className="flex-1 min-w-0">
           <div className="mb-6 flex items-center justify-between">
             <RoomCount /> {/* Exibe a contagem de resultados */}
-            {/* Espaço para futura ordenação, se implementada */}
+            <SortControls /> {/* Controles de ordenação */}
           </div>
           <RoomList /> {/* Exibe a lista de quartos ou mensagens de status */}
           <div className="mt-8 flex justify-center">

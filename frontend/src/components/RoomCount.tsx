@@ -1,22 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFilterStore } from '@/store/filters';
 
-// Componente simples para exibir a contagem total de quartos encontrados.
+// Componente para exibir uma mensagem de "Buscando..." com animação de pontos
+const LoadingText: React.FC = () => {
+  const [dots, setDots] = useState('');
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => {
+        if (prev.length >= 3) return '';
+        return prev + '.';
+      });
+    }, 400); // Atualiza a cada 400ms
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <div className="text-sm text-indigo-600 font-medium">
+      Buscando{dots}<span className="invisible">....</span>
+    </div>
+  );
+};
+
+// Componente principal para exibir a contagem total de quartos encontrados.
 const RoomCount: React.FC = () => {
   // Obtém as informações de paginação e o status de loading da store Zustand.
   const { pagination, isLoading } = useFilterStore();
 
-  // Oculta o componente durante o carregamento inicial ou se os dados de paginação ainda não chegaram.
-  // Isso evita mostrar "0 quartos encontrados" enquanto os dados estão sendo carregados.
+  // Mostra a animação "Buscando..." durante o carregamento
   if (isLoading || !pagination) {
-    // Renderiza um placeholder com altura durante o carregamento
-    return (
-      <div className="text-sm text-gray-600 h-5">
-        <div className="h-full w-32 bg-slate-200 rounded animate-pulse"></div>
-      </div>
-    );
+    return <LoadingText />;
   }
 
   // Obtém o número total de quartos dos dados de paginação.

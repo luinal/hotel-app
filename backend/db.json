@@ -5,7 +5,8 @@
     "price": 1250,
     "capacity": 4,
     "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Banheira", "Cozinha Compacta", "Vista para o Mar", "Piscina Privativa"],
-    "imageUrl": "/images/rooms/Suíte Presidencial Vista Mar.jpg"
+    "imageUrl": "/images/rooms/Suíte Presidencial Vista Mar.jpg",
+    "description": "Nossa Suíte Presidencial oferece uma experiência de luxo incomparável com vista panorâmica para o mar. Com amplos espaços, decoração sofisticada e piscina privativa, este é o refúgio perfeito para famílias que buscam o máximo em conforto e exclusividade. Desfrute de um pôr do sol deslumbrante da sua varanda privativa."
   },
   {
     "id": 2,
@@ -13,7 +14,8 @@
     "price": 350,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Quarto Duplo Standard.jpg"
+    "imageUrl": "/images/rooms/Quarto Duplo Standard.jpg",
+    "description": "Nosso Quarto Duplo Standard é a escolha ideal para casais ou viajantes a negócios. Confortável e funcional, oferece todas as comodidades essenciais para uma estadia agradável, incluindo café da manhã completo para começar bem o dia."
   },
   {
     "id": 3,
@@ -21,7 +23,8 @@
     "price": 700,
     "capacity": 5,
     "features": ["Wi-Fi", "Ar-condicionado", "Frigobar", "TV a Cabo", "Dois Banheiros", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Quarto Família Conectado.jpg"
+    "imageUrl": "/images/rooms/Quarto Família Conectado.jpg",
+    "description": "Ideal para famílias, nosso Quarto Família Conectado oferece amplo espaço para até 5 pessoas. Com dois banheiros completos e ambientes integrados, proporciona o equilíbrio perfeito entre privacidade e convivência para toda a família."
   },
   {
     "id": 4,
@@ -29,7 +32,8 @@
     "price": 180,
     "capacity": 1,
     "features": ["Wi-Fi", "Ventilador"],
-    "imageUrl": "/images/rooms/Quarto Individual Econômico.jpg"
+    "imageUrl": "/images/rooms/Quarto Individual Econômico.jpg",
+    "description": "Opção econômica e aconchegante para viajantes solo. Nosso Quarto Individual oferece privacidade e conforto essencial a um preço acessível, sendo perfeito para quem busca praticidade sem abrir mão da qualidade."
   },
   {
     "id": 5,
@@ -37,7 +41,8 @@
     "price": 950,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Banheira de Hidromassagem", "Varanda", "Frigobar", "Vista para a Montanha", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Suíte Master com Hidromassagem.jpg"
+    "imageUrl": "/images/rooms/Suíte Master com Hidromassagem.jpg",
+    "description": "Experiência romântica e relaxante com vista para as montanhas. A banheira de hidromassagem e a decoração sofisticada fazem desta suíte o refúgio perfeito para casais em lua de mel ou celebrando ocasiões especiais."
   },
   {
     "id": 6,
@@ -45,7 +50,8 @@
     "price": 1500,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Piscina Privativa", "Acesso direto ao mar", "Serviço de Quarto 24h", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Bangalô Sobre as Águas.jpeg"
+    "imageUrl": "/images/rooms/Bangalô Sobre as Águas.jpeg",
+    "description": "Construído sobre as águas cristalinas, nosso exclusivo bangalô oferece uma experiência única de conexão com o mar. Com acesso direto à água e serviço de quarto 24h, é o cenário perfeito para momentos inesquecíveis de romance e tranquilidade."
   },
   {
     "id": 7,
@@ -53,7 +59,8 @@
     "price": 550,
     "capacity": 3,
     "features": ["Wi-Fi", "Ar-condicionado", "TV a Cabo", "Frigobar"],
-    "imageUrl": "/images/rooms/Quarto Triplo Superior.jpg"
+    "imageUrl": "/images/rooms/Quarto Triplo Superior.jpg",
+    "description": "Espaçoso e bem equipado, nosso Quarto Triplo Superior acomoda confortavelmente até três pessoas. Com ambientes integrados e mobiliário versátil, é a escolha ideal para pequenos grupos de amigos ou famílias."
   },
   {
     "id": 8,
@@ -61,7 +68,8 @@
     "price": 420,
     "capacity": 2,
     "features": ["Lareira", "Cozinha Equipada", "Sem Wi-Fi", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Cabana Rústica na Floresta.jpg"
+    "imageUrl": "/images/rooms/Cabana Rústica na Floresta.jpg",
+    "description": "Desconecte-se do mundo digital e reconecte-se com a natureza nesta cabana rústica e aconchegante. Cercada pela floresta, oferece uma experiência de imersão na natureza com o conforto de uma lareira e uma cozinha totalmente equipada."
   },
   {
     "id": 9,
@@ -69,7 +77,8 @@
     "price": 880,
     "capacity": 4,
     "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Completa", "Máquina de Lavar", "Varanda Ampla"],
-    "imageUrl": "/images/rooms/Apartamento Luxo com Cozinha.jpg"
+    "imageUrl": "/images/rooms/Apartamento Luxo com Cozinha.jpg",
+    "description": "Sinta-se em casa neste apartamento de luxo completamente equipado. Ideal para estadias prolongadas, oferece cozinha completa, máquina de lavar e ampla varanda, combinando a privacidade de um lar com os serviços exclusivos de um hotel."
   },
   {
     "id": 10,
@@ -77,7 +86,8 @@
     "price": 400,
     "capacity": 3,
     "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Loft Moderno.jpg"
+    "imageUrl": "/images/rooms/Loft Moderno.jpg",
+    "description": "Nosso Loft Moderno impressiona pelo design contemporâneo e funcional. Com pé-direito duplo e decoração minimalista, oferece um ambiente elegante e descontraído para viajantes que apreciam estética e conforto."
   },
   {
     "id": 11,
@@ -85,7 +95,8 @@
     "price": 400,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Cozinha Compacta", "Smart TV"],
-    "imageUrl": "/images/rooms/Estúdio Moderno Centro da Cidade.jpg"
+    "imageUrl": "/images/rooms/Estúdio Moderno Centro da Cidade.jpg",
+    "description": "Localizado no coração da cidade, este estúdio moderno oferece conveniência e estilo. Perfeito para quem busca explorar a vida urbana, com todos os pontos turísticos a curta distância e a comodidade de uma cozinha compacta para refeições rápidas."
   },
   {
     "id": 12,
@@ -93,7 +104,8 @@
     "price": 360,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Barras de Apoio", "Portas Largas", "Chuveiro Acessível"],
-    "imageUrl": "/images/rooms/Quarto Acessível (PCD) 1.jpg"
+    "imageUrl": "/images/rooms/Quarto Acessível (PCD) 1.jpg",
+    "description": "Especialmente projetado para oferecer máxima acessibilidade e conforto. Com portas largas, barras de apoio e chuveiro adaptado, garantimos uma estadia confortável e independente para todos os nossos hóspedes com necessidades especiais."
   },
   {
     "id": 13,
@@ -101,7 +113,8 @@
     "price": 720,
     "capacity": 3,
     "features": ["Wi-Fi", "Ar-condicionado", "Sala de Estar Separada", "Sofá-cama", "Frigobar", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Suíte Júnior com Sala de Estar.jpg"
+    "imageUrl": "/images/rooms/Suíte Júnior com Sala de Estar.jpg",
+    "description": "Combine conforto e funcionalidade nesta espaçosa suíte júnior. A sala de estar separada com sofá-cama oferece flexibilidade para acomodar um hóspede adicional ou simplesmente relaxar em um ambiente dedicado ao seu lazer."
   },
   {
     "id": 14,
@@ -109,7 +122,8 @@
     "price": 480,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para o Jardim"],
-    "imageUrl": "/images/rooms/Quarto Casal Vista Jardim.jpg"
+    "imageUrl": "/images/rooms/Quarto Casal Vista Jardim.jpg",
+    "description": "Desfrute da tranquilidade e beleza do nosso jardim tropical a partir da varanda privativa deste confortável quarto. O ambiente sereno e a vista exuberante criam o cenário perfeito para momentos de relaxamento e contemplação."
   },
   {
     "id": 15,
@@ -117,7 +131,8 @@
     "price": 90,
     "capacity": 8,
     "features": ["Wi-Fi", "Armários Individuais", "Banheiro Compartilhado", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Dormitório Compartilhado (Hostel).jpg"
+    "imageUrl": "/images/rooms/Dormitório Compartilhado (Hostel).jpg",
+    "description": "Opção econômica e sociável para viajantes que buscam conhecer pessoas de todo o mundo. Nosso dormitório compartilhado oferece camas confortáveis, armários individuais seguros e um ambiente descontraído para uma experiência autêntica de hostel."
   },
   {
     "id": 16,
@@ -125,7 +140,8 @@
     "price": 1100,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Decoração Romântica", "Banheira Dupla", "Champanhe Cortesia", "Vista Panorâmica"],
-    "imageUrl": "/images/rooms/Suíte Lua de Mel Romântica.jpg"
+    "imageUrl": "/images/rooms/Suíte Lua de Mel Romântica.jpg",
+    "description": "Celebre o amor nesta suíte exclusiva, cuidadosamente decorada para criar momentos inesquecíveis. Com banheira dupla, champanhe de cortesia e vista panorâmica, proporcionamos o cenário perfeito para o início de uma vida a dois."
   },
   {
     "id": 17,
@@ -133,7 +149,8 @@
     "price": 390,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Café da Manhã Incluso", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Quarto Standard com Café da Manhã.jpg"
+    "imageUrl": "/images/rooms/Quarto Standard com Café da Manhã.jpg",
+    "description": "Conforto e praticidade com nosso delicioso café da manhã incluso no preço. Este quarto oferece excelente custo-benefício para quem busca uma estadia agradável sem abrir mão da qualidade e conveniência."
   },
   {
     "id": 18,
@@ -141,7 +158,8 @@
     "price": 220,
     "capacity": 2,
     "features": ["Wi-Fi", "Ventilador", "Beliche"],
-    "imageUrl": "/images/rooms/Quarto com Beliche Econômico.jpg"
+    "imageUrl": "/images/rooms/Quarto com Beliche Econômico.jpg",
+    "description": "Solução econômica e prática para viajantes que priorizam experiências fora do quarto. Com beliche confortável e instalações básicas, é a escolha ideal para aventureiros que buscam uma base simples para explorar o destino."
   },
   {
     "id": 19,
@@ -149,7 +167,8 @@
     "price": 2500,
     "capacity": 6,
     "features": ["Wi-Fi", "Ar-condicionado Central", "Piscina na Cobertura", "Cozinha Gourmet", "Elevador Privativo", "Vista 360º", "Café da Manhã"],
-    "imageUrl": "/images/rooms/Penthouse Exclusiva.jpg"
+    "imageUrl": "/images/rooms/Penthouse Exclusiva.jpg",
+    "description": "O ápice do luxo e exclusividade. Nossa penthouse na cobertura impressiona com vista 360º, piscina privativa, cozinha gourmet e elevador exclusivo. Espaço amplo para até 6 pessoas desfrutarem de uma experiência incomparável de hospedagem."
   },
   {
     "id": 20,
@@ -157,6 +176,7 @@
     "price": 520,
     "capacity": 2,
     "features": ["Wi-Fi", "Ar-condicionado", "Varanda", "Vista para a Piscina", "Frigobar"],
-    "imageUrl": "/images/rooms/Quarto Duplo Vista Piscina.jpg"
+    "imageUrl": "/images/rooms/Quarto Duplo Vista Piscina.jpg",
+    "description": "Relaxe na varanda privativa com vista direta para nossa piscina principal. Este quarto duplo oferece ambiente tranquilo e refrescante, perfeito para quem busca momentos de descanso e lazer durante sua estadia."
   }
 ] 

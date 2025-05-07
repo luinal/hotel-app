@@ -8,6 +8,7 @@ export interface Room {
   capacity: number;
   features: string[];
   imageUrl?: string;
+  description?: string;
 }
 
 export interface PaginationInfo {
@@ -17,6 +18,10 @@ export interface PaginationInfo {
   limit: number;
 }
 
+// Tipos para ordenação
+export type OrderBy = '' | 'name' | 'price' | 'capacity';
+export type OrderDirection = 'asc' | 'desc';
+
 export interface FilterState {
   name: string;
   priceMin: string; 
@@ -24,13 +29,16 @@ export interface FilterState {
   capacity: string;
   features: { [key: string]: boolean };
   page: number;
+  orderBy: OrderBy;
+  orderDirection: OrderDirection;
   rooms: Room[];
   pagination: PaginationInfo | null;
   isLoading: boolean;
   error: string | null;
-  setFilters: (partialFilters: Partial<Omit<FilterState, 'setFilters' | 'clearFilters' | 'setPage' | 'setRoomsLoadingError'>>) => void;
+  setFilters: (partialFilters: Partial<Omit<FilterState, 'setFilters' | 'clearFilters' | 'setPage' | 'setRoomsLoadingError' | 'setOrder'>>) => void;
   clearFilters: () => void;
   setPage: (page: number) => void;
+  setOrder: (orderBy: OrderBy, orderDirection: OrderDirection) => void;
   setRoomsLoadingError: (rooms: Room[], pagination: PaginationInfo | null, isLoading: boolean, error: string | null) => void;
 }
 
@@ -57,6 +65,8 @@ const initialFilters = {
     return acc;
   }, {} as { [key: string]: boolean }),
   page: 1,
+  orderBy: '' as OrderBy,
+  orderDirection: 'asc' as OrderDirection,
 };
 
 export const useFilterStore = create<FilterState>()(
@@ -83,11 +93,21 @@ export const useFilterStore = create<FilterState>()(
 
     clearFilters: () =>
       set((state) => {
-        // Limpar completamente o estado e definir para os valores iniciais
+        // Guarda os valores atuais de ordenação
+        const currentOrderBy = state.orderBy;
+        const currentOrderDirection = state.orderDirection;
+        
+        // Limpa completamente o estado e define para os valores iniciais
         Object.keys(initialFilters).forEach(key => {
-          // @ts-ignore - Necessário para acessar as propriedades dinamicamente
-          state[key] = structuredClone(initialFilters[key as keyof typeof initialFilters]);
+          if (key !== 'orderBy' && key !== 'orderDirection') {
+            // @ts-ignore - Necessário para acessar as propriedades dinamicamente
+            state[key] = structuredClone(initialFilters[key as keyof typeof initialFilters]);
+          }
         });
+        
+        // Restaura os valores de ordenação
+        state.orderBy = currentOrderBy;
+        state.orderDirection = currentOrderDirection;
         
         // Limpa resultados e erro ao limpar filtros
         state.rooms = [];
@@ -100,6 +120,16 @@ export const useFilterStore = create<FilterState>()(
       set((state) => {
         state.page = page;
          // Limpa resultados e erro ao mudar página para forçar nova busca
+        state.rooms = [];
+        state.pagination = null;
+        state.error = null;
+      }),
+      
+    setOrder: (orderBy, orderDirection) =>
+      set((state) => {
+        state.orderBy = orderBy;
+        state.orderDirection = orderDirection;
+        // Limpa resultados e erro ao mudar ordenação para forçar nova busca
         state.rooms = [];
         state.pagination = null;
         state.error = null;
