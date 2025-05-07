@@ -83,11 +83,17 @@ export const useFilterStore = create<FilterState>()(
 
     clearFilters: () =>
       set((state) => {
-        Object.assign(state, initialFilters);
-         // Limpa resultados e erro ao limpar filtros
+        // Limpar completamente o estado e definir para os valores iniciais
+        Object.keys(initialFilters).forEach(key => {
+          // @ts-ignore - Necessário para acessar as propriedades dinamicamente
+          state[key] = structuredClone(initialFilters[key as keyof typeof initialFilters]);
+        });
+        
+        // Limpa resultados e erro ao limpar filtros
         state.rooms = [];
         state.pagination = null;
         state.error = null;
+        state.isLoading = true; // Define como loading para garantir que uma nova busca será feita
       }),
 
     setPage: (page) =>

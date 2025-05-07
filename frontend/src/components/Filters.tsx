@@ -13,7 +13,8 @@ const Filters: React.FC = () => {
     priceMax: storePriceMax,
     capacity, features,
     setFilters, clearFilters,
-    setRoomsLoadingError
+    setRoomsLoadingError,
+    isLoading
   } = useFilterStore();
 
   // --- Estado Local para Inputs ---
@@ -35,9 +36,17 @@ const Filters: React.FC = () => {
   // Controla se a store deve atualizar o input (apenas na inicialização ou no clearFilters)
   const shouldSyncFromStore = useRef(true);
   
-  // Sincroniza o estado local apenas quando a store muda por razões externas (como clearFilters)
+  // Sincroniza o estado local sempre que a store muda por razões externas (como clearFilters)
   useEffect(() => {
-    if (shouldSyncFromStore.current) {
+    // Sempre sincronize quando os filtros foram limpos (todos os valores da store estão vazios)
+    const isStoreEmpty = 
+      storeName === '' && 
+      storePriceMin === '' && 
+      storePriceMax === '' && 
+      capacity === '' && 
+      Object.values(features).every(val => val === false);
+    
+    if (shouldSyncFromStore.current || isStoreEmpty) {
       setLocalName(storeName || '');
       setLocalPriceMin(storePriceMin || '');
       setLocalPriceMax(storePriceMax || '');
@@ -59,11 +68,12 @@ const Filters: React.FC = () => {
       return acc;
     }, {} as FilterState['features']));
     
+    // Reativa a sincronização para garantir que os estados locais 
+    // sejam atualizados após o clearFilters
+    shouldSyncFromStore.current = true;
+    
     // Depois limpa os filtros na store para atualização do estado global
     clearFilters();
-    
-    // Ativa o skeleton de carregamento para indicar que os dados estão sendo recarregados
-    setRoomsLoadingError([], null, true, null);
   };
 
   // --- Lógica de Debounce para Atualizar a Store Zustand ---
@@ -145,10 +155,10 @@ const Filters: React.FC = () => {
         <h2 className="text-xl font-semibold text-slate-800">Filtros</h2>
         <button
           onClick={handleClearFilters}
-          disabled={!isAnyFilterActive}
-          aria-disabled={!isAnyFilterActive}
+          disabled={!isAnyFilterActive || isLoading}
+          aria-disabled={!isAnyFilterActive || isLoading}
           className={`text-sm font-medium transition-colors ${
-            isAnyFilterActive 
+            isAnyFilterActive && !isLoading
               ? 'text-indigo-600 hover:text-indigo-500 cursor-pointer' 
               : 'text-slate-400 opacity-50 cursor-not-allowed'
           }`}

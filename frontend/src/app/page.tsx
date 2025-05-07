@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useFilterStore, availableFeatures } from '@/store/filters';
 import RoomList from '@/components/RoomList';
@@ -14,6 +14,10 @@ function SearchPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams(); // Hook para ler os parâmetros da URL
+  
+  // Controle para evitar loops de atualização
+  const isUpdatingFromUrl = useRef(false);
+  const isUpdatingUrl = useRef(false);
 
   // Seletores para obter o estado e as ações da store Zustand
   const {
@@ -26,6 +30,10 @@ function SearchPageContent() {
   // Executa apenas uma vez quando o componente é montado.
   // Lê os parâmetros da URL e atualiza o estado Zustand se houver divergência.
   useEffect(() => {
+    if (isUpdatingUrl.current) return; // Evita loop se estiver atualizando da store para URL
+    
+    isUpdatingFromUrl.current = true;
+    
     const params = new URLSearchParams(searchParams.toString());
     const initialUpdate: Parameters<typeof setFilters>[0] = {};
     let needsUpdate = false;
@@ -56,27 +64,46 @@ function SearchPageContent() {
 
     const featureUpdate: { [key: string]: boolean } = {};
     let featureChanged = false;
+    
+    // Inicializa todas as features como false primeiro
     Object.keys(availableFeatures).forEach(key => {
-      const paramValue = params.get(key) === 'true';
-      if (params.has(key) && paramValue !== features[key]) {
-          featureUpdate[key] = paramValue;
+      featureUpdate[key] = false;
+    });
+    
+    // Depois atualiza apenas as features presentes na URL
+    Object.keys(availableFeatures).forEach(key => {
+      if (params.has(key)) {
+        const paramValue = params.get(key) === 'true';
+        featureUpdate[key] = paramValue;
+        if (paramValue !== features[key]) {
           featureChanged = true;
+        }
       }
     });
+    
     if (featureChanged) {
-        initialUpdate.features = { ...features, ...featureUpdate };
-        needsUpdate = true;
+      initialUpdate.features = featureUpdate;
+      needsUpdate = true;
     }
 
     if (needsUpdate) {
       setFilters(initialUpdate);
     }
+    
+    // Desativa a flag após a atualização
+    setTimeout(() => {
+      isUpdatingFromUrl.current = false;
+    }, 0);
   }, [searchParams, name, priceMin, priceMax, capacity, features, page, setFilters]);
 
   // --- Efeito 2: Atualização da URL a partir dos Filtros --- //
   // Executa sempre que qualquer filtro (name, priceMin, etc.) ou a página mudar no estado Zustand.
   // Constrói a query string e atualiza a URL do navegador sem recarregar a página.
   useEffect(() => {
+    if (isUpdatingFromUrl.current) return; // Evita loop se estiver atualizando da URL para store
+    
+    isUpdatingUrl.current = true;
+    
     const params = new URLSearchParams();
     // Adiciona os filtros ao objeto URLSearchParams se tiverem valor
     if (name) params.set('name', name);
@@ -97,6 +124,11 @@ function SearchPageContent() {
         // router.replace atualiza a URL sem adicionar uma nova entrada no histórico do navegador.
         router.replace(`${pathname}?${params.toString()}`);
     }
+    
+    // Desativa a flag após a atualização
+    setTimeout(() => {
+      isUpdatingUrl.current = false;
+    }, 0);
 
   // Dependências do efeito: monitora todas as variáveis de filtro e página do Zustand.
   // eslint-disable-next-line react-hooks/exhaustive-deps
