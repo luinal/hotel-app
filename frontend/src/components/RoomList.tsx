@@ -27,7 +27,7 @@ const RoomCard: React.FC<{
       <div className="w-48 md:w-64 h-40 md:h-48 bg-slate-100 flex-shrink-0 flex items-center justify-center relative">
         {room.imageUrl ? (
           <Image 
-            src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}${room.imageUrl}`}
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${room.imageUrl}`}
             alt={`Imagem do quarto ${room.name}`}
             className="w-full h-full object-cover" // Garante que a imagem cubra o espaço
             width={256}

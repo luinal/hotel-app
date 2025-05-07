@@ -181,7 +181,7 @@ function SearchPageContent() {
       let errorData = null;
 
       // Define a URL base da API backend
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
       try {
         const response = await fetch(`${apiBaseUrl}/rooms?${params.toString()}`);

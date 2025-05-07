@@ -9,7 +9,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 // Conteúdo do arquivo .env.production para o frontend
 const frontendProdEnvContent = `# Configuração da URL da API para produção
 # Substitua pela URL real do seu backend em produção
-NEXT_PUBLIC_API_BASE_URL=https://seu-backend-api.com
+NEXT_PUBLIC_API_BASE_URL=https://hotel-app-v0mc.onrender.com
 `;
 
 // Conteúdo do arquivo .env.local para o backend
