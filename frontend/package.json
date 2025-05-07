@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --no-lint",
+    "build": "node build.js",
+    "custom-build": "node build.js",
     "start": "next start",
     "lint": "next lint"
   },
