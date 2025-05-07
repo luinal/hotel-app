@@ -100,7 +100,7 @@ export const useFilterStore = create<FilterState>()(
         // Limpa completamente o estado e define para os valores iniciais
         Object.keys(initialFilters).forEach(key => {
           if (key !== 'orderBy' && key !== 'orderDirection') {
-            // @ts-ignore - Necessário para acessar as propriedades dinamicamente
+            // @ts-expect-error - Necessário para acessar as propriedades dinamicamente
             state[key] = structuredClone(initialFilters[key as keyof typeof initialFilters]);
           }
         });
