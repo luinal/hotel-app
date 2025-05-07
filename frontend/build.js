@@ -3,17 +3,8 @@ const { execSync } = require('child_process');
 console.log('Starting custom build...');
 
 try {
-  // Set environment variables to disable ESLint
-  process.env.NEXT_DISABLE_ESLINT = '1';
-  process.env.CI = 'false';
-  
   console.log('Running Next.js build...');
-  execSync('next build', { 
-    env: { 
-      ...process.env,
-      NEXT_DISABLE_ESLINT: '1',
-      CI: 'false'
-    },
+  execSync('next build --no-lint', { 
     stdio: 'inherit' 
   });
   

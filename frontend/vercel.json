@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run custom-build",
+  "buildCommand": "chmod +x vercel-build.sh && ./vercel-build.sh",
   "devCommand": "npm run dev",
   "installCommand": "npm install"
 } 
