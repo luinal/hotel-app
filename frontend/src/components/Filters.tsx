@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFilterStore, availableFeatures, FilterState } from '@/store/filters';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -12,69 +12,127 @@ const Filters: React.FC = () => {
     priceMin: storePriceMin,
     priceMax: storePriceMax,
     capacity, features,
-    setFilters, clearFilters
+    setFilters, clearFilters,
+    setRoomsLoadingError
   } = useFilterStore();
 
-  // Determina se algum filtro está ativo
-  const isAnyFilterActive = 
-    storeName !== '' || 
-    storePriceMin !== '' || 
-    storePriceMax !== '' || 
-    capacity !== '' || 
-    Object.values(features).some(isActive => isActive);
-
-  // --- Estado Local para Inputs com Debounce ---
+  // --- Estado Local para Inputs ---
+  // Inicializa o estado local apenas uma vez e depois o mantém independente
   const [localName, setLocalName] = useState(storeName || '');
-
+  const [localPriceMin, setLocalPriceMin] = useState(storePriceMin || '');
+  const [localPriceMax, setLocalPriceMax] = useState(storePriceMax || '');
+  const [localCapacity, setLocalCapacity] = useState(capacity || '');
+  const [localFeatures, setLocalFeatures] = useState<FilterState['features']>({...features});
+  
+  // Determina se algum filtro está ativo usando os estados locais para inputs controlados localmente
+  const isAnyFilterActive = 
+    localName !== '' || 
+    localPriceMin !== '' || 
+    localPriceMax !== '' || 
+    localCapacity !== '' || 
+    Object.values(localFeatures).some(isActive => isActive);
+    
+  // Controla se a store deve atualizar o input (apenas na inicialização ou no clearFilters)
+  const shouldSyncFromStore = useRef(true);
+  
+  // Sincroniza o estado local apenas quando a store muda por razões externas (como clearFilters)
   useEffect(() => {
-    if (storeName !== localName && (storeName !== undefined || localName !== '')) {
+    if (shouldSyncFromStore.current) {
       setLocalName(storeName || '');
+      setLocalPriceMin(storePriceMin || '');
+      setLocalPriceMax(storePriceMax || '');
+      setLocalCapacity(capacity || '');
+      setLocalFeatures({...features});
+      shouldSyncFromStore.current = false;
     }
-  }, [storeName, localName]); // localName adicionado como dependência
+  }, [storeName, storePriceMin, storePriceMax, capacity, features]);
+
+  // Re-habilita a sincronização quando os filtros são limpos
+  const handleClearFilters = () => {
+    // Primeiro limpa os estados locais para atualização imediata da UI
+    setLocalName('');
+    setLocalPriceMin('');
+    setLocalPriceMax('');
+    setLocalCapacity('');
+    setLocalFeatures(Object.keys(availableFeatures).reduce((acc, key) => {
+      acc[key] = false;
+      return acc;
+    }, {} as FilterState['features']));
+    
+    // Depois limpa os filtros na store para atualização do estado global
+    clearFilters();
+    
+    // Ativa o skeleton de carregamento para indicar que os dados estão sendo recarregados
+    setRoomsLoadingError([], null, true, null);
+  };
 
   // --- Lógica de Debounce para Atualizar a Store Zustand ---
-  // Função que realmente chama setFilters na store
-  const updateStoreWithName = useCallback((newName: string) => {
-    setFilters({ name: newName });
-  }, [setFilters]);
+  const debouncedUpdateStore = useDebouncedCallback((field: string, value: string) => {
+    setFilters({ [field]: value });
+  }, 700);
 
-  const debouncedUpdateStoreName = useDebouncedCallback(updateStoreWithName, 700);
-
-  // useEffect para observar mudanças no localName e chamar a atualização debounced da store
-  useEffect(() => {
-    if (localName !== storeName) {
-      debouncedUpdateStoreName(localName);
-    }
-    return () => {
-      debouncedUpdateStoreName.cancel();
-    };
-  }, [localName, storeName, debouncedUpdateStoreName]);
-
-  // Handler para o input de nome (atualiza estado local)
+  // Handler para o input de nome
   const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalName(e.target.value);
+    const newValue = e.target.value;
+    setLocalName(newValue);
+    
+    // Imediatamente configura o estado para loading quando o usuário digita
+    // Isso garante que o skeleton seja exibido entre digitações
+    setRoomsLoadingError([], null, true, null);
+    
+    // Sempre chama o debounce, mesmo com string vazia
+    debouncedUpdateStore('name', newValue);
   };
 
-  // Handler para inputs de preço (atualiza a store diretamente por enquanto, SEM DEBOUNCE)
+  // Handler para inputs de preço com debounce
   const handlePriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name: inputName, value } = e.target;
-    setFilters({ [inputName]: value });
+    
+    // Verifica se o input é um número válido
+    if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
+      return; // Impede a entrada de valores não numéricos
+    }
+    
+    // Atualiza o estado local correspondente
+    if (inputName === 'priceMin') {
+      setLocalPriceMin(value);
+    } else if (inputName === 'priceMax') {
+      setLocalPriceMax(value);
+    }
+    
+    // Mostra o skeleton de carregamento imediatamente
+    setRoomsLoadingError([], null, true, null);
+    
+    // Atualiza a store com debounce
+    debouncedUpdateStore(inputName, value);
   };
 
-  // Handler para os checkboxes de features.
-  // Atualiza o estado imediatamente (sem debounce) quando um checkbox é marcado/desmarcado.
+  // Handler para os checkboxes de features com estado local.
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name: inputName, checked } = e.target;
-    // Chama setFilters diretamente, atualizando o objeto 'features' no estado.
-    // Cria um novo objeto de features mesclando o estado atual com a feature alterada.
-    setFilters({ features: { ...features, [inputName]: checked } });
+    
+    // Atualiza o estado local primeiro para resposta imediata da UI
+    const newFeatures = { ...localFeatures, [inputName]: checked };
+    setLocalFeatures(newFeatures);
+    
+    // Ativa o skeleton de carregamento
+    setRoomsLoadingError([], null, true, null);
+    
+    // Atualiza a store Zustand
+    setFilters({ features: newFeatures });
   };
 
-  // Handler para o select de capacidade.
-  // Atualiza o estado imediatamente (sem debounce).
+  // Handler para o select de capacidade com estado local.
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name: inputName, value } = e.target;
-    // Chama setFilters diretamente para o select.
+    
+    // Atualiza o estado local para resposta imediata da UI
+    setLocalCapacity(value);
+    
+    // Ativa o skeleton de carregamento
+    setRoomsLoadingError([], null, true, null);
+    
+    // Chama setFilters para o select.
     setFilters({ [inputName]: value });
   };
 
@@ -86,10 +144,13 @@ const Filters: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-slate-800">Filtros</h2>
         <button
-          onClick={clearFilters}
-          disabled={!isAnyFilterActive} // Desabilita se nenhum filtro estiver ativo
-          className={`text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors ${
-            !isAnyFilterActive ? 'opacity-50 cursor-not-allowed' : ''
+          onClick={handleClearFilters}
+          disabled={!isAnyFilterActive}
+          aria-disabled={!isAnyFilterActive}
+          className={`text-sm font-medium transition-colors ${
+            isAnyFilterActive 
+              ? 'text-indigo-600 hover:text-indigo-500 cursor-pointer' 
+              : 'text-slate-400 opacity-50 cursor-not-allowed'
           }`}
         >
           Limpar Filtros
@@ -117,25 +178,25 @@ const Filters: React.FC = () => {
           <div className="mt-1 grid grid-cols-2 gap-3">
             <div>
               <input
-                type="number"
+                type="text"
                 id="priceMin"
                 name="priceMin"
-                value={storePriceMin || ''} // Usa valor da store diretamente
-                onChange={handlePriceInputChange} // Handler sem debounce
+                value={localPriceMin}
+                onChange={handlePriceInputChange}
                 placeholder="Mín R$"
-                min="0"
+                pattern="[0-9]*\.?[0-9]*"
                 className={`${inputBaseClass} text-center`}
               />
             </div>
             <div>
               <input
-                type="number"
+                type="text"
                 id="priceMax"
                 name="priceMax"
-                value={storePriceMax || ''} // Usa valor da store diretamente
-                onChange={handlePriceInputChange} // Handler sem debounce
+                value={localPriceMax}
+                onChange={handlePriceInputChange}
                 placeholder="Máx R$"
-                min="0"
+                pattern="[0-9]*\.?[0-9]*"
                 className={`${inputBaseClass} text-center`}
               />
             </div>
@@ -148,7 +209,7 @@ const Filters: React.FC = () => {
           <select
             id="capacity"
             name="capacity"
-            value={capacity || ''}
+            value={localCapacity}
             onChange={handleSelectChange}
             className={inputBaseClass}
           >
@@ -173,7 +234,7 @@ const Filters: React.FC = () => {
                   id={`feature-${key}`}
                   name={key}
                   type="checkbox"
-                  checked={features[key as keyof FilterState['features']] || false} // Ajuste de tipo
+                  checked={localFeatures[key as keyof FilterState['features']] || false}
                   onChange={handleCheckboxChange}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded group-hover:border-indigo-400 transition-colors"
                 />
