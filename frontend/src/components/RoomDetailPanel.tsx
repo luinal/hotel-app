@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Room } from '@/store/filters';
+import Image from 'next/image';
 
 interface RoomDetailPanelProps {
   room: Room | null;
@@ -14,15 +15,15 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
   const [isRendered, setIsRendered] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   
-  // Array de imagens de exemplo - normalmente viria do backend
-  const images = [
-    'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+1',
-    'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+2',
-    'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+3',
-  ];
-  
   // Criar um array de imagens que inclui a imagem do quarto (se existir) e as imagens placeholder
   const roomImages = useMemo(() => {
+    // Array de imagens de exemplo - normalmente viria do backend
+    const images = [
+      'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+1',
+      'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+2',
+      'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+3',
+    ];
+    
     if (room?.imageUrl) {
       return [
         `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}${room.imageUrl}`,
@@ -30,7 +31,7 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
       ];
     }
     return images;
-  }, [room?.imageUrl, images]);
+  }, [room?.imageUrl]);
 
   // Resetar a imagem ativa quando mudar de quarto
   useEffect(() => {
@@ -133,10 +134,13 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
                   zIndex: index === activeImageIndex ? 1 : 0
                 }}
               >
-                <img 
+                <Image 
                   src={imageUrl} 
                   alt={`Imagem ${index + 1} do quarto ${room.name}`}
                   className="w-full h-full object-cover"
+                  width={600}
+                  height={400}
+                  unoptimized={true}
                 />
               </div>
             ))}

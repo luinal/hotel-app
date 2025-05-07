@@ -25,8 +25,7 @@ function SearchPageContent() {
     name, priceMin, priceMax, capacity, features, page,
     orderBy, orderDirection,
     setFilters,
-    setRoomsLoadingError,
-    setOrder
+    setRoomsLoadingError
   } = useFilterStore();
 
   // --- Efeito 1: Inicialização dos Filtros a partir da URL --- //

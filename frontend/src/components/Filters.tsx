@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useFilterStore, availableFeatures, FilterState } from '@/store/filters';
 import { useDebouncedCallback } from 'use-debounce';
 

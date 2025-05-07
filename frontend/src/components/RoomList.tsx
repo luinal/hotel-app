@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFilterStore, Room } from '@/store/filters';
 import RoomDetailPanel from './RoomDetailPanel';
+import Image from 'next/image';
 
 // Componente para renderizar um único card de quarto.
 // Recebe as informações do quarto via props.
@@ -25,10 +26,13 @@ const RoomCard: React.FC<{
       {/* Imagem do Quarto */}
       <div className="w-48 md:w-64 h-40 md:h-48 bg-slate-100 flex-shrink-0 flex items-center justify-center relative">
         {room.imageUrl ? (
-          <img 
+          <Image 
             src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}${room.imageUrl}`}
             alt={`Imagem do quarto ${room.name}`}
             className="w-full h-full object-cover" // Garante que a imagem cubra o espaço
+            width={256}
+            height={192}
+            unoptimized={true}
           />
         ) : (
           <span className="text-slate-400 text-sm">Sem imagem</span>
