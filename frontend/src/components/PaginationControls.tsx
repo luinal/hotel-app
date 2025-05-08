@@ -92,9 +92,9 @@ const PaginationControls: React.FC = () => {
           {...item}
           sx={{
             '&.Mui-selected': {
-              bgcolor: 'primary.lighter',
+              bgcolor: 'primary.main',
               borderColor: 'primary.main',
-              color: 'primary.main',
+              color: 'white',
             }
           }}
         />
