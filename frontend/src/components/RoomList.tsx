@@ -75,7 +75,7 @@ const RoomCard: React.FC<{
       >
         {room.imageUrl ? (
           <Image 
-            src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${room.imageUrl}`}
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}${room.imageUrl}`}
             alt={`Imagem do quarto ${room.name}`}
             style={{ objectFit: 'cover' }}
             fill

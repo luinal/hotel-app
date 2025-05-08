@@ -148,6 +148,16 @@ function getUser(email) {
   }
 }
 
+function getUserById(id) {
+  const db = connect();
+  try {
+    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
+    return stmt.get(id);
+  } finally {
+    db.close();
+  }
+}
+
 function createUser(name, email, password) {
   const db = connect();
   try {
@@ -192,6 +202,7 @@ function removeFavorite(userId, roomId) {
 module.exports = {
   getRooms,
   getUser,
+  getUserById,
   createUser,
   getFavorites,
   addFavorite,

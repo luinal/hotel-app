@@ -5,7 +5,7 @@ import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
 }
@@ -22,11 +22,15 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  checkAuth: () => Promise<void>;
   
   // Favorites actions
-  toggleFavorite: (roomId: number) => void;
+  toggleFavorite: (roomId: number) => Promise<void>;
   isFavorite: (roomId: number) => boolean;
 }
+
+// URL base da API
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -42,27 +46,28 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // For this simple implementation, we'll simulate a login
-          // In a real app, this would be an API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const response = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
           
-          // Mock successful login
-          if (email === 'user@example.com' && password === 'password') {
-            const user = {
-              id: '1',
-              email: 'user@example.com',
-              name: 'Demo User'
-            };
-            
-            set({
-              user,
-              token: 'mock-jwt-token',
-              isAuthenticated: true,
-              isLoading: false
-            });
-          } else {
-            throw new Error('Email ou senha inválidos');
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao fazer login');
           }
+          
+          const data = await response.json();
+          
+          set({
+            user: data.user,
+            favorites: data.favorites || [],
+            isAuthenticated: true,
+            isLoading: false,
+            token: data.token
+          });
         } catch (error) {
           set({ 
             isLoading: false,
@@ -75,21 +80,27 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // Simulate registration delay
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const response = await fetch(`${API_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, password }),
+          });
           
-          // Mock successful registration
-          const user = {
-            id: '1',
-            email,
-            name
-          };
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao registrar usuário');
+          }
+          
+          const data = await response.json();
           
           set({
-            user,
-            token: 'mock-jwt-token',
+            user: data.user,
+            favorites: data.favorites || [],
             isAuthenticated: true,
-            isLoading: false
+            isLoading: false,
+            token: data.token
           });
         } catch (error) {
           set({ 
@@ -99,26 +110,90 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       
+      checkAuth: async () => {
+        const { token } = get();
+        if (!token) return;
+        
+        try {
+          set({ isLoading: true });
+          
+          const response = await fetch(`${API_URL}/api/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            // Token inválido ou expirado
+            set({
+              user: null,
+              token: null,
+              favorites: [],
+              isAuthenticated: false,
+              isLoading: false
+            });
+            return;
+          }
+          
+          const data = await response.json();
+          
+          set({
+            user: data.user,
+            favorites: data.favorites,
+            isAuthenticated: true,
+            isLoading: false
+          });
+        } catch (error) {
+          console.error('Erro ao verificar autenticação:', error);
+          set({
+            isLoading: false,
+            user: null,
+            token: null,
+            favorites: [],
+            isAuthenticated: false
+          });
+        }
+      },
+      
       logout: () => {
         set({
           user: null,
           token: null,
+          favorites: [],
           isAuthenticated: false
         });
       },
       
-      toggleFavorite: (roomId: number) => {
-        set(state => {
-          const isFav = state.favorites.includes(roomId);
+      toggleFavorite: async (roomId: number) => {
+        const { user, favorites, token } = get();
+        
+        if (!user || !token) return;
+        
+        const isFav = favorites.includes(roomId);
+        const endpoint = isFav ? 'remove' : 'add';
+        
+        try {
+          const response = await fetch(`${API_URL}/api/favorites/${endpoint}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ roomId })
+          });
           
-          if (isFav) {
-            // Remove from favorites
-            state.favorites = state.favorites.filter(id => id !== roomId);
-          } else {
-            // Add to favorites
-            state.favorites.push(roomId);
+          if (!response.ok) {
+            throw new Error('Falha ao atualizar favorito');
           }
-        });
+          
+          const data = await response.json();
+          
+          set(state => {
+            state.favorites = data.favorites;
+          });
+        } catch (error) {
+          console.error('Erro ao gerenciar favorito:', error);
+        }
       },
       
       isFavorite: (roomId: number) => {

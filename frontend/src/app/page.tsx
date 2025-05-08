@@ -171,7 +171,7 @@ function SearchPageContent() {
       let paginationData = null;
       let errorData = null;
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
       try {
         const response = await fetch(`${apiBaseUrl}/rooms?${params.toString()}`);

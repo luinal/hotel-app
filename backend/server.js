@@ -6,10 +6,15 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const NodeCache = require('node-cache');
+const jwt = require('jsonwebtoken');
 const db = require('./db');
 
 const app = express();
 const port = process.env.PORT || 5000; // Alterado para 5000 para corresponder ao Docker
+
+// Chave secreta para JWT - em produção deve ser armazenada em variável de ambiente
+const JWT_SECRET = process.env.JWT_SECRET || 'hotelapp-jwt-secret';
+const JWT_EXPIRES_IN = '7d'; // Token válido por 7 dias
 
 // Middleware para parsing de JSON
 app.use(express.json());
@@ -33,6 +38,25 @@ if (!fs.existsSync(dbPath)) {
   console.log('Banco de dados não encontrado. Executando inicialização...');
   require('./init-db');
 }
+
+// Middleware para autenticar token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Format: Bearer TOKEN
+  
+  if (!token) return res.status(401).json({ error: 'Token não fornecido' });
+  
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Token inválido ou expirado' });
+    req.user = user;
+    next();
+  });
+};
+
+// Função para gerar token JWT
+const generateToken = (user) => {
+  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
 
 // Rota GET /rooms - buscar quartos com filtros
 app.get('/rooms', (req, res) => {
@@ -99,12 +123,16 @@ app.post('/api/auth/login', (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
     
+    // Gerar token JWT
+    const token = generateToken(user);
+    
     // Retornar dados do usuário (exceto senha) e favoritos
     const { password: _, ...userData } = user;
     const favorites = db.getFavorites(user.id);
     
     res.json({
       user: userData,
+      token,
       favorites
     });
   } catch (error) {
@@ -131,12 +159,17 @@ app.post('/api/auth/register', (req, res) => {
     const result = db.createUser(name, email, password);
     
     if (result.changes === 1) {
+      // Buscar o usuário recém-criado para gerar o token
+      const newUser = db.getUser(email);
+      const token = generateToken(newUser);
+      
       res.status(201).json({
         user: {
           id: result.lastInsertRowid,
           name,
           email
         },
+        token,
         favorites: []
       });
     } else {
@@ -148,12 +181,36 @@ app.post('/api/auth/register', (req, res) => {
   }
 });
 
-// Rotas para gerenciar favoritos
-app.post('/api/favorites/add', (req, res) => {
-  const { userId, roomId } = req.body;
+// Verificar token e retornar informações do usuário
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  try {
+    const user = db.getUserById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Não enviar a senha
+    const { password: _, ...userData } = user;
+    const favorites = db.getFavorites(user.id);
+    
+    res.json({
+      user: userData,
+      favorites
+    });
+  } catch (error) {
+    console.error('Erro ao verificar usuário:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
+});
+
+// Rotas para gerenciar favoritos - agora requer autenticação
+app.post('/api/favorites/add', authenticateToken, (req, res) => {
+  const userId = req.user.id; // Extrair do token
+  const { roomId } = req.body;
   
-  if (!userId || !roomId) {
-    return res.status(400).json({ error: 'ID do usuário e do quarto são obrigatórios' });
+  if (!roomId) {
+    return res.status(400).json({ error: 'ID do quarto é obrigatório' });
   }
   
   try {
@@ -166,11 +223,12 @@ app.post('/api/favorites/add', (req, res) => {
   }
 });
 
-app.post('/api/favorites/remove', (req, res) => {
-  const { userId, roomId } = req.body;
+app.post('/api/favorites/remove', authenticateToken, (req, res) => {
+  const userId = req.user.id; // Extrair do token
+  const { roomId } = req.body;
   
-  if (!userId || !roomId) {
-    return res.status(400).json({ error: 'ID do usuário e do quarto são obrigatórios' });
+  if (!roomId) {
+    return res.status(400).json({ error: 'ID do quarto é obrigatório' });
   }
   
   try {

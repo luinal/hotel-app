@@ -6,6 +6,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '../theme';
 import Header from '@/components/Header';
+import AuthProvider from '@/components/AuthProvider';
 import { Container, Box, Typography } from '@mui/material';
 
 // Carrega a fonte Inter usando o sistema de fontes do Next.js
@@ -27,18 +28,20 @@ export default function RootLayout({
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Header />
-            <Box component="main" sx={{ py: { xs: 4, sm: 6 } }}>
-              {/* O conteúdo da página será inserido aqui */}
-              {children}
-            </Box>
-            <Box component="footer" sx={{ bgcolor: 'grey.900', borderTop: 1, borderColor: 'grey.800', mt: 6 }}>
-              <Container sx={{ py: 4, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  © {new Date().getFullYear()} HotelApp. Todos os direitos reservados.
-                </Typography>
-              </Container>
-            </Box>
+            <AuthProvider>
+              <Header />
+              <Box component="main" sx={{ py: { xs: 4, sm: 6 } }}>
+                {/* O conteúdo da página será inserido aqui */}
+                {children}
+              </Box>
+              <Box component="footer" sx={{ bgcolor: 'grey.900', borderTop: 1, borderColor: 'grey.800', mt: 6 }}>
+                <Container sx={{ py: 4, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    © {new Date().getFullYear()} HotelApp. Todos os direitos reservados.
+                  </Typography>
+                </Container>
+              </Box>
+            </AuthProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

@@ -37,7 +37,7 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
     
     if (room?.imageUrl) {
       return [
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${room.imageUrl}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}${room.imageUrl}`,
         ...images
       ];
     }
