@@ -36,14 +36,14 @@ const SortControls: React.FC = () => {
   const selectBaseClass = "bg-white border border-slate-300 rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm";
   
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center justify-end space-x-3">
       <span className="text-sm font-medium text-slate-700">Ordenar por:</span>
       
       {/* Select para o campo de ordenação */}
       <select
         value={orderBy}
         onChange={handleOrderChange}
-        className={`${selectBaseClass} min-w-[120px]`}
+        className={`${selectBaseClass} w-[100px]`}
         disabled={isLoading}
       >
         {orderByOptions.map((option) => (
@@ -57,7 +57,7 @@ const SortControls: React.FC = () => {
       <select
         value={orderDirection}
         onChange={handleDirectionChange}
-        className={`${selectBaseClass} min-w-[130px]`}
+        className={`${selectBaseClass} w-[120px]`}
         disabled={isLoading || !orderBy}
       >
         {orderDirections.map((option) => (

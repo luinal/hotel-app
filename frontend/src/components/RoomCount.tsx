@@ -42,10 +42,10 @@ const RoomCount: React.FC = () => {
   return (
     <div className="text-sm text-gray-600">
       {count === 0
-        ? 'Nenhum quarto encontrado.'
+        ? 'Nenhum quarto encontrado'
         : count === 1
-        ? '1 quarto encontrado.'
-        : `${count} quartos encontrados.`} { /* Pluralização simples */}
+        ? '1 quarto encontrado'
+        : `${count} quartos encontrados`} { /* Pluralização simples */}
     </div>
   );
 };

@@ -95,8 +95,8 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
     <>
       {/* Overlay escuro atrás do painel */}
       <div 
-        className={`fixed inset-0 bg-black transition-opacity duration-500 z-40 ${
-          isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 transition-opacity duration-500 z-40 ${
+          isOpen ? 'opacity-0' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
         aria-hidden="true"
