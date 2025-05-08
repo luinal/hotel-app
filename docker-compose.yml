@@ -1,32 +1,27 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  backend:
+    build: ./backend
     ports:
-      - "8080:3000"
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DB_PATH=/app/data/hotel.db
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - sqlite-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
     depends_on:
       - backend
-    environment:
-      - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:8000
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:3001"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
+    restart: unless-stopped
 
 volumes:
-  node_modules: 
+  sqlite-data:
+    driver: local 

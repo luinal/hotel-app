@@ -4,29 +4,44 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 const NodeCache = require('node-cache');
+const db = require('./db');
 
 const app = express();
 const port = process.env.PORT || 5000; // Alterado para 5000 para corresponder ao Docker
 
+// Middleware para parsing de JSON
+app.use(express.json());
+
 // Configurar CORS para permitir requisições de múltiplas origens
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:8080', 
+  'http://localhost:8080',
+  'https://hotel-app-frontend.onrender.com',
+  'https://hotel-app-backend.onrender.com',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // Permitir requisições sem origin (como mobile apps ou curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Bloqueado pelo CORS'));
+// Opção mais permissiva para CORS em ambiente de produção
+if (process.env.NODE_ENV === 'production') {
+  // Em produção, usar CORS simples que aceita qualquer origem
+  app.use(cors());
+} else {
+  // Em desenvolvimento, usar CORS com verificação de origem
+  app.use(cors({
+    origin: function(origin, callback) {
+      // Permitir requisições sem origin (como mobile apps ou curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log('Origem bloqueada pelo CORS:', origin);
+        callback(new Error('Bloqueado pelo CORS'));
+      }
     }
-  }
-}));
+  }));
+}
 
 // Servir arquivos estáticos da pasta 'public'
 app.use(express.static('public'));
@@ -34,31 +49,14 @@ app.use(express.static('public'));
 // Cache em memória com TTL (Time To Live) de 5 minutos
 const cache = new NodeCache({ stdTTL: 300 });
 
-// Carregar dados dos quartos do JSON
-let allRooms = [];
-try {
-  const rawData = fs.readFileSync('db.json', 'utf8');
-  allRooms = JSON.parse(rawData);
-  console.log(`Carregados ${allRooms.length} quartos do db.json`);
-} catch (error) {
-  console.error('Erro ao ler db.json:', error);
-  // Em caso de erro, a API retornará um array vazio, mas o servidor continuará rodando.
+// Verificar se o banco de dados existe, se não, executar script de inicialização
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'hotel.db');
+if (!fs.existsSync(dbPath)) {
+  console.log('Banco de dados não encontrado. Executando inicialização...');
+  require('./init-db');
 }
 
-// Mapeamento de query params para nomes de features no JSON
-const featureMap = {
-  wifi: 'Wi-Fi',
-  ac: 'Ar-condicionado',
-  varanda: 'Varanda',
-  piscina: 'Piscina Privativa',
-  vistaMar: 'Vista para o Mar',
-  cozinha: 'Cozinha Compacta',
-  banheira: 'Banheira',
-  lareira: 'Lareira',
-  cafe: 'Café da Manhã',
-};
-
-// Rota GET /rooms
+// Rota GET /rooms - buscar quartos com filtros
 app.get('/rooms', (req, res) => {
   const queryParams = req.query;
   const cacheKey = JSON.stringify(queryParams); // Chave de cache baseada nos parâmetros
@@ -72,75 +70,139 @@ app.get('/rooms', (req, res) => {
 
   console.log('Processando requisição para:', queryParams);
 
-  let filteredRooms = [...allRooms];
+  try {
+    // Buscar quartos do banco de dados com os filtros
+    const filteredRooms = db.getRooms(queryParams);
+    
+    // Paginação
+    const page = parseInt(queryParams.page, 10) || 1;
+    const limit = parseInt(queryParams.limit, 10) || 10; // 10 quartos por página por padrão
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
 
-  // Aplicar filtros
-  if (queryParams.name) {
-    filteredRooms = filteredRooms.filter(room =>
-      room.name.toLowerCase().includes(queryParams.name.toLowerCase())
-    );
+    const totalRooms = filteredRooms.length;
+    const paginatedRooms = filteredRooms.slice(startIndex, endIndex);
+    
+    // Corrigir cálculo de totalPages
+    const totalPages = totalRooms <= limit ? 1 : Math.ceil(totalRooms / limit);
+    
+    const result = {
+      rooms: paginatedRooms,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalRooms: totalRooms,
+        limit: limit,
+      },
+    };
+
+    // Armazenar resultado no cache antes de retornar
+    cache.set(cacheKey, result);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Erro ao buscar quartos:', error);
+    res.status(500).json({ error: 'Erro interno ao buscar quartos' });
   }
+});
 
-  if (queryParams.priceMin) {
-    const minPrice = parseFloat(queryParams.priceMin);
-    if (!isNaN(minPrice)) {
-      filteredRooms = filteredRooms.filter(room => room.price >= minPrice);
-    }
-  }
-
-  if (queryParams.priceMax) {
-    const maxPrice = parseFloat(queryParams.priceMax);
-    if (!isNaN(maxPrice)) {
-      filteredRooms = filteredRooms.filter(room => room.price <= maxPrice);
-    }
-  }
-
-  if (queryParams.capacity) {
-    const capacity = parseInt(queryParams.capacity, 10);
-    if (!isNaN(capacity)) {
-      filteredRooms = filteredRooms.filter(room => room.capacity === capacity);
-    }
-  }
-
-  // Filtrar por features (verifica se *todas* as features solicitadas estão presentes)
-  const requestedFeatures = Object.keys(featureMap)
-    .filter(key => queryParams[key] === 'true') // Pega apenas as features marcadas como true
-    .map(key => featureMap[key]); // Mapeia para o nome real da feature
-
-  if (requestedFeatures.length > 0) {
-    filteredRooms = filteredRooms.filter(room =>
-      requestedFeatures.every(feature => room.features.includes(feature))
-    );
-  }
-
-  // Paginação
-  const page = parseInt(queryParams.page, 10) || 1;
-  const limit = parseInt(queryParams.limit, 10) || 10; // 10 quartos por página por padrão
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-
-  const totalRooms = filteredRooms.length;
-  const paginatedRooms = filteredRooms.slice(startIndex, endIndex);
+// Rotas de autenticação e usuários
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
   
-  // Corrigir cálculo de totalPages
-  // Se totalRooms for menor que limit, então totalPages deve ser 1
-  // Caso contrário, calcular normalmente
-  const totalPages = totalRooms <= limit ? 1 : Math.ceil(totalRooms / limit);
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
   
-  const result = {
-    rooms: paginatedRooms,
-    pagination: {
-      currentPage: page,
-      totalPages: totalPages,
-      totalRooms: totalRooms,
-      limit: limit,
-    },
-  };
+  try {
+    const user = db.getUser(email);
+    
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+    
+    // Retornar dados do usuário (exceto senha) e favoritos
+    const { password: _, ...userData } = user;
+    const favorites = db.getFavorites(user.id);
+    
+    res.json({
+      user: userData,
+      favorites
+    });
+  } catch (error) {
+    console.error('Erro no login:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
+});
 
-  // Armazenar resultado no cache antes de retornar
-  cache.set(cacheKey, result);
+app.post('/api/auth/register', (req, res) => {
+  const { name, email, password } = req.body;
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+  }
+  
+  try {
+    // Verificar se usuário já existe
+    const existingUser = db.getUser(email);
+    if (existingUser) {
+      return res.status(409).json({ error: 'Email já cadastrado' });
+    }
+    
+    // Criar novo usuário
+    const result = db.createUser(name, email, password);
+    
+    if (result.changes === 1) {
+      res.status(201).json({
+        user: {
+          id: result.lastInsertRowid,
+          name,
+          email
+        },
+        favorites: []
+      });
+    } else {
+      throw new Error('Falha ao criar usuário');
+    }
+  } catch (error) {
+    console.error('Erro no registro:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
+});
 
-  res.json(result);
+// Rotas para gerenciar favoritos
+app.post('/api/favorites/add', (req, res) => {
+  const { userId, roomId } = req.body;
+  
+  if (!userId || !roomId) {
+    return res.status(400).json({ error: 'ID do usuário e do quarto são obrigatórios' });
+  }
+  
+  try {
+    db.addFavorite(userId, roomId);
+    const favorites = db.getFavorites(userId);
+    res.json({ favorites });
+  } catch (error) {
+    console.error('Erro ao adicionar favorito:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
+});
+
+app.post('/api/favorites/remove', (req, res) => {
+  const { userId, roomId } = req.body;
+  
+  if (!userId || !roomId) {
+    return res.status(400).json({ error: 'ID do usuário e do quarto são obrigatórios' });
+  }
+  
+  try {
+    db.removeFavorite(userId, roomId);
+    const favorites = db.getFavorites(userId);
+    res.json({ favorites });
+  } catch (error) {
+    console.error('Erro ao remover favorito:', error);
+    res.status(500).json({ error: 'Erro interno no servidor' });
+  }
 });
 
 // Iniciar o servidor
