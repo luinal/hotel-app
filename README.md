@@ -6,8 +6,7 @@ Este projeto implementa uma aplicação web para buscar e filtrar quartos de hot
 
 ## Funcionalidades
 
-- Busca de quartos por nome.
-- Filtro por faixa de preço (mínimo e máximo), capacidade de pessoas e características (ex: Wi-Fi, Ar-condicionado).
+- Filtro por nome, faixa de preço (mínimo e máximo), capacidade de pessoas e características (ex: Wi-Fi, Ar-condicionado).
 - Atualização da lista de resultados e contagem de quartos em tempo real.
 - Paginação dos resultados.
 - Sincronização dos filtros com a URL (search params).
@@ -108,26 +107,63 @@ hotel-app/
 
 7.  **Abra seu navegador** e acesse `http://localhost:3000`.
 
-## Variáveis de Ambiente
+## Como Rodar com Docker
 
-O projeto utiliza variáveis de ambiente para configurar diferentes ambientes (desenvolvimento, produção). Para mais detalhes, consulte o arquivo [ENV_SETUP.md](./ENV_SETUP.md).
+Se preferir utilizar Docker, o projeto está configurado com docker-compose para facilitar a execução.
 
-### Frontend (Next.js)
-- `NEXT_PUBLIC_API_BASE_URL`: URL base da API backend (default: http://localhost:3001)
-- `NEXT_PUBLIC_APP_ENV`: Ambiente atual (development, production)
+1. **Pré-requisitos:**
+   - Docker instalado
+   - Docker Compose instalado
 
-### Backend (Node.js)
-- `PORT`: Porta em que o servidor backend será executado (default: 3001)
-- `FRONTEND_URL`: URL do frontend para configuração de CORS (default: http://localhost:3000)
-- `NODE_ENV`: Ambiente de execução (development, production)
+2. **Clone o repositório:**
+   ```bash
+   git clone <URL_DO_REPOSITORIO>
+   cd hotel-app
+   ```
 
-## Deploy
+3. **Inicie os contêineres:**
+   ```bash
+   docker-compose up -d
+   ```
+   Isso irá:
+   - Construir as imagens do frontend e backend
+   - Iniciar os contêineres em modo detached (segundo plano)
+   - Mapear as portas necessárias
 
-Para instruções detalhadas sobre como fazer deploy deste projeto em serviços de hospedagem, consulte o arquivo [DEPLOY.md](./DEPLOY.md). O documento contém guias para:
+4. **Acesse a aplicação:**
+   - Frontend: http://localhost:8080
+   - Backend API: http://localhost:8000
 
-- Deploy do backend em serviços gratuitos (Render, Railway, Fly.io)
-- Deploy do frontend no Vercel
-- Configuração das variáveis de ambiente em produção
+5. **Visualizar logs dos contêineres:**
+   ```bash
+   docker logs hotel-app-frontend-1 -f  # Frontend logs
+   docker logs hotel-app-backend-1 -f   # Backend logs
+   ```
+
+6. **Parar os contêineres:**
+   ```bash
+   docker-compose down
+   ```
+
+7. **Reconstruir as imagens (quando necessário):**
+   ```bash
+   docker-compose build --no-cache
+   docker-compose up -d
+   ```
+
+### Portas e Configurações Docker
+
+- **Frontend:**
+  - Porta interna: 3000 (porta padrão do Next.js)
+  - Porta externa mapeada: 8080 (acesse via http://localhost:8080)
+  
+- **Backend:**
+  - Porta interna: 5000 (porta utilizada dentro do contêiner)
+  - Porta externa mapeada: 8000 (acesse via http://localhost:8000)
+
+Os arquivos estão montados como volumes, o que permite editar o código e ver as mudanças em tempo real sem reconstruir os contêineres.
+
+
 
 ## API Backend
 

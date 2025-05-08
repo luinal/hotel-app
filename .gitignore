@@ -31,3 +31,5 @@ Thumbs.db
 /.vscode
 *.sublime-*
 *.swp 
+
+misc/
