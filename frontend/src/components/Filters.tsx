@@ -36,6 +36,31 @@ const Filters: React.FC = () => {
   // Controla se a store deve atualizar o input (apenas na inicialização ou no clearFilters)
   const shouldSyncFromStore = useRef(true);
   
+  // Função para formatar valor como moeda brasileira (sem o R$)
+  const formatCurrency = (value: string): string => {
+    // Remove caracteres não numéricos
+    const numericValue = value.replace(/\D/g, '');
+    
+    // Se não houver valor, retorna string vazia
+    if (numericValue === '') return '';
+    
+    // Converte para número e divide por 100 para obter valor com decimais
+    const floatValue = parseInt(numericValue, 10) / 100;
+    
+    // Formata o número com separadores brasileiros
+    return floatValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+  
+  // Função para converter valor formatado para o formato da API
+  const parseCurrency = (formattedValue: string): string => {
+    // Remove pontos e substitui vírgula por ponto para ter o formato que a API espera
+    if (!formattedValue) return '';
+    return formattedValue.replace(/\./g, '').replace(',', '.');
+  };
+
   // Sincroniza o estado local sempre que a store muda por razões externas (como clearFilters)
   useEffect(() => {
     // Sempre sincronize quando os filtros foram limpos (todos os valores da store estão vazios)
@@ -48,8 +73,9 @@ const Filters: React.FC = () => {
     
     if (shouldSyncFromStore.current || isStoreEmpty) {
       setLocalName(storeName || '');
-      setLocalPriceMin(storePriceMin || '');
-      setLocalPriceMax(storePriceMax || '');
+      // Formata os valores de preço ao recuperar da store
+      setLocalPriceMin(storePriceMin ? formatCurrency(storePriceMin.replace('.', '').padEnd(storePriceMin.includes('.') ? 3 : 1, '0')) : '');
+      setLocalPriceMax(storePriceMax ? formatCurrency(storePriceMax.replace('.', '').padEnd(storePriceMax.includes('.') ? 3 : 1, '0')) : '');
       setLocalCapacity(capacity || '');
       setLocalFeatures({...features});
       shouldSyncFromStore.current = false;
@@ -94,27 +120,25 @@ const Filters: React.FC = () => {
     debouncedUpdateStore('name', newValue);
   };
 
-  // Handler para inputs de preço com debounce
+  // Handler para inputs de preço com debounce e formatação
   const handlePriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name: inputName, value } = e.target;
     
-    // Verifica se o input é um número válido
-    if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
-      return; // Impede a entrada de valores não numéricos
-    }
+    // Formata o valor inserido
+    const formattedValue = formatCurrency(value);
     
-    // Atualiza o estado local correspondente
+    // Atualiza o estado local correspondente com o valor formatado
     if (inputName === 'priceMin') {
-      setLocalPriceMin(value);
+      setLocalPriceMin(formattedValue);
     } else if (inputName === 'priceMax') {
-      setLocalPriceMax(value);
+      setLocalPriceMax(formattedValue);
     }
     
     // Mostra o skeleton de carregamento imediatamente
     setRoomsLoadingError([], null, true, null);
     
-    // Atualiza a store com debounce
-    debouncedUpdateStore(inputName, value);
+    // Atualiza a store com debounce usando o valor numérico para a API
+    debouncedUpdateStore(inputName, parseCurrency(formattedValue));
   };
 
   // Handler para os checkboxes de features com estado local.
@@ -194,7 +218,6 @@ const Filters: React.FC = () => {
                 value={localPriceMin}
                 onChange={handlePriceInputChange}
                 placeholder="Mín R$"
-                pattern="[0-9]*\.?[0-9]*"
                 className={`${inputBaseClass} text-center`}
               />
             </div>
@@ -206,7 +229,6 @@ const Filters: React.FC = () => {
                 value={localPriceMax}
                 onChange={handlePriceInputChange}
                 placeholder="Máx R$"
-                pattern="[0-9]*\.?[0-9]*"
                 className={`${inputBaseClass} text-center`}
               />
             </div>
