@@ -75,20 +75,17 @@ const initialFilters = {
 export const useFilterStore = create<FilterState>()(
   immer((set) => ({
     ...initialFilters,
-    rooms: [] as Room[],
+    rooms: [],
     pagination: null,
     isLoading: false,
     error: null,
 
     setFilters: (partialFilters) =>
       set((state) => {
-        // Atualiza apenas os filtros fornecidos
         Object.assign(state, partialFilters);
-        // Reseta a página para 1 sempre que um filtro (exceto a própria página) for alterado
         if (!('page' in partialFilters && Object.keys(partialFilters).length === 1)) {
             state.page = 1;
         }
-        // Limpa resultados e erro ao mudar filtros para forçar nova busca
         state.rooms = [];
         state.pagination = null;
         state.error = null;
@@ -96,12 +93,10 @@ export const useFilterStore = create<FilterState>()(
 
     clearFilters: () =>
       set((state) => {
-        // Guarda os valores atuais de ordenação
         const currentOrderBy = state.orderBy;
         const currentOrderDirection = state.orderDirection;
         const currentFavoriteOnly = state.favoriteOnly;
         
-        // Limpa completamente o estado e define para os valores iniciais
         Object.keys(initialFilters).forEach(key => {
           if (key !== 'orderBy' && key !== 'orderDirection' && key !== 'favoriteOnly') {
             // @ts-expect-error - Necessário para acessar as propriedades dinamicamente
@@ -109,22 +104,19 @@ export const useFilterStore = create<FilterState>()(
           }
         });
         
-        // Restaura os valores de ordenação e favoritos
         state.orderBy = currentOrderBy;
         state.orderDirection = currentOrderDirection;
         state.favoriteOnly = currentFavoriteOnly;
         
-        // Limpa resultados e erro ao limpar filtros
         state.rooms = [];
         state.pagination = null;
         state.error = null;
-        state.isLoading = true; // Define como loading para garantir que uma nova busca será feita
+        state.isLoading = true;
       }),
 
     setPage: (page) =>
       set((state) => {
         state.page = page;
-         // Limpa resultados e erro ao mudar página para forçar nova busca
         state.rooms = [];
         state.pagination = null;
         state.error = null;
@@ -134,7 +126,6 @@ export const useFilterStore = create<FilterState>()(
       set((state) => {
         state.orderBy = orderBy;
         state.orderDirection = orderDirection;
-        // Limpa resultados e erro ao mudar ordenação para forçar nova busca
         state.rooms = [];
         state.pagination = null;
         state.error = null;
@@ -143,7 +134,6 @@ export const useFilterStore = create<FilterState>()(
     setFavoriteOnly: (favoriteOnly) =>
       set((state) => {
         state.favoriteOnly = favoriteOnly;
-        // Reset to first page and clear results when toggling favorites filter
         state.page = 1;
         state.rooms = [];
         state.pagination = null;

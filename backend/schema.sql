@@ -10,13 +10,13 @@ CREATE TABLE IF NOT EXISTS rooms (
   imageUrl TEXT
 );
 
--- Tabela de características (features)
+-- Tabela de características
 CREATE TABLE IF NOT EXISTS features (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE
 );
 
--- Tabela de relacionamento entre quartos e características
+-- Relacionamento entre quartos e características
 CREATE TABLE IF NOT EXISTS room_features (
   room_id INTEGER,
   feature_id INTEGER,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS favorites (
   FOREIGN KEY (room_id) REFERENCES rooms (id) ON DELETE CASCADE
 );
 
--- Inserir características padrão
+-- Características padrão
 INSERT OR IGNORE INTO features (name) VALUES
   ('Wi-Fi'),
   ('Ar-condicionado'),

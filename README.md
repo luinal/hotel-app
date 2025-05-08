@@ -1,17 +1,17 @@
 # Hotel App - Busca e Filtro de Quartos
 
-Este projeto implementa uma aplicação web para buscar e filtrar quartos de hotel em tempo real, utilizando Next.js para o frontend e Node.js para o backend.
+Este projeto implementa uma aplicação web para buscar e filtrar quartos de hotel em tempo real, utilizando Next.js para o frontend e Node.js com SQLite para o backend.
 
 **Demo:** [https://hotel-app-ochre-five.vercel.app/](https://hotel-app-ochre-five.vercel.app/)
 
 ## Funcionalidades
 
-- Filtro por nome, faixa de preço (mínimo e máximo), capacidade de pessoas e características (ex: Wi-Fi, Ar-condicionado).
+- Filtro por nome, faixa de preço (mínimo e máximo), capacidade de pessoas, favoritos e características (ex: Wi-Fi, Ar-condicionado).
 - Atualização da lista de resultados e contagem de quartos em tempo real.
 - Paginação dos resultados.
 - Sincronização dos filtros com a URL (search params).
-- Carregamento automático dos filtros ao acessar uma URL com parâmetros.
-- Backend com API REST para servir os dados dos quartos.
+- Sistema de autenticação (login/cadastro) com funcionalidade de favoritos para usuários autenticados.
+- Backend com API REST usando SQLite como banco de dados.
 - Cache em memória no backend para otimizar consultas.
 - Compatível com dispositivos mobile.
 - Virtualização com Docker.
@@ -27,39 +27,51 @@ Este projeto implementa uma aplicação web para buscar e filtrar quartos de hot
 - **Backend:**
   - Node.js
   - Express.js
+  - SQLite (Banco de dados)
+  - Better-SQLite3 (Interface para SQLite)
   - Cors
   - Node-cache (Cache em memória)
   - Dotenv (Variáveis de ambiente)
-  - JSON (Base de dados mockada)
 
 ## Estrutura do Projeto
 
 ```
 hotel-app/
-├── backend/         # Código do servidor Node.js
+├── backend/          # Código do servidor Node.js
 │   ├── node_modules/
-│   ├── db.json      # Base de dados mockada
-│   ├── .env         # Variáveis de ambiente do backend (não versionado)
+│   ├── db.json       # Dados iniciais (importados para SQLite)
+│   ├── schema.sql    # Definição do esquema do banco de dados
+│   ├── init-db.js    # Script para inicializar o banco
+│   ├── db.js         # Módulo de acesso ao banco de dados
+│   ├── .env          # Variáveis de ambiente do backend (não versionado)
+│   ├── hotel.db      # Banco de dados SQLite (gerado)
 │   ├── package.json
-│   ├── server.js    # Arquivo principal do servidor
+│   ├── server.js     # Arquivo principal do servidor
 │   └── ...
-├── frontend/        # Código da aplicação Next.js
+├── frontend/         # Código da aplicação Next.js
 │   ├── node_modules/
 │   ├── public/
 │   ├── src/
-│   │   ├── app/       # Rotas e páginas principais (App Router)
+│   │   ├── app/        # Rotas e páginas principais (App Router)
 │   │   ├── components/ # Componentes React reutilizáveis
+│   │   │   ├── AuthDialog.tsx    # Modal de autenticação
+│   │   │   ├── Filters.tsx       # Painel de filtros
+│   │   │   ├── Header.tsx        # Cabeçalho com menu de usuário
+│   │   │   ├── RoomCard.tsx      # Card de quartos com botão de favorito
+│   │   │   ├── UserMenu.tsx      # Menu de usuário com avatar e favoritos
+│   │   │   └── ...
 │   │   ├── store/      # Store Zustand para estado global
+│   │   │   ├── filters.ts  # Estado dos filtros
+│   │   │   ├── auth.ts     # Estado de autenticação e favoritos
+│   │   │   └── ...
 │   │   └── ...
-│   ├── .env.local     # Variáveis de ambiente para desenvolvimento (não versionado)
+│   ├── .env.local      # Variáveis de ambiente para desenvolvimento (não versionado)
 │   ├── .env.production # Variáveis de ambiente para produção (não versionado)
-│   ├── env-setup.js   # Script para configurar variáveis de ambiente
 │   ├── package.json
 │   ├── next.config.js
 │   └── ...
-├── ENV_SETUP.md     # Documentação de variáveis de ambiente
-├── DEPLOY.md        # Guia de deploy do projeto
-└── README.md        # Este arquivo
+├── docker-compose.yml  # Configuração para Docker Compose
+├── README.md           # Este arquivo
 ```
 
 ## Pré-requisitos
@@ -75,24 +87,23 @@ hotel-app/
     cd hotel-app
     ```
 
-2.  **Configurar variáveis de ambiente:**
+2.  **Instale as dependências do Backend:**
     ```bash
-    cd frontend
-    npm run setup-env
-    ```
-    Isso criará os arquivos `.env.local` e `.env.production` para o frontend e `.env` para o backend com configurações padrão.
-
-3.  **Instale as dependências do Backend:**
-    ```bash
-    cd ../backend
+    cd backend
     npm install
     ```
+
+3.  **Inicialize o banco de dados SQLite:**
+    ```bash
+    npm run init-db
+    ```
+    Isso criará o arquivo `hotel.db` com o esquema e dados iniciais.
 
 4.  **Inicie o servidor Backend:**
     ```bash
     npm run dev
     ```
-    O backend estará rodando em `http://localhost:3001`.
+    O backend estará rodando em `http://localhost:8000`.
 
 5.  **Instale as dependências do Frontend (em outro terminal):**
     ```bash
@@ -129,10 +140,11 @@ Se preferir utilizar Docker, o projeto está configurado com docker-compose para
    Isso irá:
    - Construir as imagens do frontend e backend
    - Iniciar os contêineres em modo detached (segundo plano)
+   - Inicializar automaticamente o banco de dados SQLite
    - Mapear as portas necessárias
 
 4. **Acesse a aplicação:**
-   - Frontend: http://localhost:8080
+   - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
 
 5. **Visualizar logs dos contêineres:**
@@ -146,27 +158,13 @@ Se preferir utilizar Docker, o projeto está configurado com docker-compose para
    docker-compose down
    ```
 
-7. **Reconstruir as imagens (quando necessário):**
-   ```bash
-   docker-compose build --no-cache
-   docker-compose up -d
-   ```
+### Dados de Persistência
 
-### Portas e Configurações Docker
-
-- **Frontend:**
-  - Porta interna: 3000 (porta padrão do Next.js)
-  - Porta externa mapeada: 8080 (acesse via http://localhost:8080)
-  
-- **Backend:**
-  - Porta interna: 5000 (porta utilizada dentro do contêiner)
-  - Porta externa mapeada: 8000 (acesse via http://localhost:8000)
-
-Os arquivos estão montados como volumes, o que permite editar o código e ver as mudanças em tempo real sem reconstruir os contêineres.
-
-
+O Docker Compose configura um volume nomeado `sqlite-data` para persistir o banco de dados SQLite entre reinicializações dos contêineres. Isso garante que seus dados (incluindo usuários e favoritos) sejam mantidos.
 
 ## API Backend
+
+### Quartos
 
 - **`GET /rooms`**: Retorna a lista de quartos filtrada e paginada.
   - **Query Parameters:**
@@ -174,16 +172,12 @@ Os arquivos estão montados como volumes, o que permite editar o código e ver a
     - `priceMin` (number): Preço mínimo.
     - `priceMax` (number): Preço máximo.
     - `capacity` (number): Capacidade exata.
-    - `wifi` (boolean - `true`): Requer Wi-Fi.
-    - `ac` (boolean - `true`): Requer Ar-condicionado.
-    - `varanda` (boolean - `true`): Requer Varanda.
-    - `piscina` (boolean - `true`): Requer Piscina Privativa.
-    - `vistaMar` (boolean - `true`): Requer Vista para o Mar.
-    - `cozinha` (boolean - `true`): Requer Cozinha Compacta.
-    - `banheira` (boolean - `true`): Requer Banheira.
-    - `lareira` (boolean - `true`): Requer Lareira.
+    - `wifi`, `ac`, `varanda`, etc. (boolean - `true`): Filtros de características.
+    - `favoriteOnly` (boolean): Apenas quartos favoritos (requer autenticação).
     - `page` (number): Número da página (default: 1).
     - `limit` (number): Quantidade de itens por página (default: 10).
+    - `orderBy`: Campo para ordenação (`name`, `price`, `capacity`).
+    - `orderDirection`: Direção da ordenação (`asc`, `desc`).
   - **Exemplo de Resposta:**
     ```json
     {
@@ -193,7 +187,8 @@ Os arquivos estão montados como volumes, o que permite editar o código e ver a
           "name": "Suíte Luxo",
           "price": 250,
           "capacity": 2,
-          "features": ["Wi-Fi", "Ar-condicionado"]
+          "features": ["Wi-Fi", "Ar-condicionado"],
+          "imageUrl": "/images/rooms/suite-luxo.jpg"
         }
         // ... outros quartos
       ],
@@ -203,5 +198,80 @@ Os arquivos estão montados como volumes, o que permite editar o código e ver a
         "totalRooms": 15,
         "limit": 10
       }
+    }
+    ```
+
+### Autenticação
+
+- **`POST /api/auth/login`**: Autentica um usuário.
+  - **Body:**
+    ```json
+    {
+      "email": "usuario@email.com",
+      "password": "senha123"
+    }
+    ```
+  - **Resposta:**
+    ```json
+    {
+      "user": {
+        "id": 1,
+        "name": "Usuário Teste",
+        "email": "usuario@email.com"
+      },
+      "favorites": [1, 3, 5]
+    }
+    ```
+
+- **`POST /api/auth/register`**: Registra um novo usuário.
+  - **Body:**
+    ```json
+    {
+      "name": "Novo Usuário",
+      "email": "novo@email.com",
+      "password": "senha123"
+    }
+    ```
+  - **Resposta:**
+    ```json
+    {
+      "user": {
+        "id": 2,
+        "name": "Novo Usuário",
+        "email": "novo@email.com"
+      },
+      "favorites": []
+    }
+    ```
+
+### Favoritos
+
+- **`POST /api/favorites/add`**: Adiciona um quarto aos favoritos.
+  - **Body:**
+    ```json
+    {
+      "userId": 1,
+      "roomId": 2
+    }
+    ```
+  - **Resposta:**
+    ```json
+    {
+      "favorites": [1, 2, 3, 5]
+    }
+    ```
+
+- **`POST /api/favorites/remove`**: Remove um quarto dos favoritos.
+  - **Body:**
+    ```json
+    {
+      "userId": 1,
+      "roomId": 2
+    }
+    ```
+  - **Resposta:**
+    ```json
+    {
+      "favorites": [1, 3, 5]
     }
     ``` 

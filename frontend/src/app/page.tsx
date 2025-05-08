@@ -10,18 +10,14 @@ import PaginationControls from '@/components/PaginationControls';
 import SortControls from '@/components/SortControls';
 import { Container, Box } from '@mui/material';
 
-// Componente interno para encapsular a lógica que depende dos hooks de navegação,
-// permitindo o uso de Suspense na página principal.
 function SearchPageContent() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams(); // Hook para ler os parâmetros da URL
+  const searchParams = useSearchParams();
   
-  // Controle para evitar loops de atualização
   const isUpdatingFromUrl = useRef(false);
   const isUpdatingUrl = useRef(false);
 
-  // Seletores para obter o estado e as ações da store Zustand
   const {
     name, priceMin, priceMax, capacity, features, page,
     orderBy, orderDirection, favoriteOnly,
@@ -29,11 +25,9 @@ function SearchPageContent() {
     setRoomsLoadingError
   } = useFilterStore();
 
-  // --- Efeito 1: Inicialização dos Filtros a partir da URL --- //
-  // Executa apenas uma vez quando o componente é montado.
-  // Lê os parâmetros da URL e atualiza o estado Zustand se houver divergência.
+  // Sincroniza URL → Estado
   useEffect(() => {
-    if (isUpdatingUrl.current) return; // Evita loop se estiver atualizando da store para URL
+    if (isUpdatingUrl.current) return;
     
     isUpdatingFromUrl.current = true;
     
@@ -68,12 +62,10 @@ function SearchPageContent() {
     const featureUpdate: { [key: string]: boolean } = {};
     let featureChanged = false;
     
-    // Inicializa todas as features como false primeiro
     Object.keys(availableFeatures).forEach(key => {
       featureUpdate[key] = false;
     });
     
-    // Depois atualiza apenas as features presentes na URL
     Object.keys(availableFeatures).forEach(key => {
       if (params.has(key)) {
         const paramValue = params.get(key) === 'true';
@@ -89,10 +81,8 @@ function SearchPageContent() {
       needsUpdate = true;
     }
 
-    // Verifica os parâmetros de ordenação
     if (params.has('orderBy')) {
       const urlOrderBy = params.get('orderBy')!;
-      // Verifica se o valor é um dos valores válidos de orderBy
       if (['name', 'price', 'capacity', ''].includes(urlOrderBy) && urlOrderBy !== orderBy) {
         initialUpdate.orderBy = urlOrderBy as 'name' | 'price' | 'capacity' | '';
         needsUpdate = true;
@@ -103,7 +93,6 @@ function SearchPageContent() {
       needsUpdate = true;
     }
     
-    // Check favorites filter
     if (params.has('favoriteOnly')) {
       const urlFavoriteOnly = params.get('favoriteOnly') === 'true';
       if (urlFavoriteOnly !== favoriteOnly) {
@@ -116,30 +105,26 @@ function SearchPageContent() {
       setFilters(initialUpdate);
     }
     
-    // Desativa a flag após a atualização
     setTimeout(() => {
       isUpdatingFromUrl.current = false;
     }, 0);
   }, [searchParams, name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, setFilters]);
 
-  // --- Efeito 2: Atualização da URL a partir dos Filtros --- //
-  // Executa sempre que qualquer filtro (name, priceMin, etc.) ou a página mudar no estado Zustand.
-  // Constrói a query string e atualiza a URL do navegador sem recarregar a página.
+  // Sincroniza Estado → URL
   useEffect(() => {
-    if (isUpdatingFromUrl.current) return; // Evita loop se estiver atualizando da URL para store
+    if (isUpdatingFromUrl.current) return;
     
     isUpdatingUrl.current = true;
     
     const params = new URLSearchParams();
-    // Adiciona os filtros ao objeto URLSearchParams se tiverem valor
     if (name) params.set('name', name);
     if (priceMin) params.set('priceMin', priceMin);
     if (priceMax) params.set('priceMax', priceMax);
     if (capacity) params.set('capacity', capacity);
     Object.entries(features).forEach(([key, value]) => {
-      if (value) params.set(key, 'true'); // Adiciona apenas features ativas
+      if (value) params.set(key, 'true');
     });
-    if (page > 1) params.set('page', page.toString()); // Adiciona página se não for a primeira
+    if (page > 1) params.set('page', page.toString());
     if (orderBy) {
       params.set('orderBy', orderBy);
       params.set('orderDirection', orderDirection);
@@ -148,31 +133,21 @@ function SearchPageContent() {
       params.set('favoriteOnly', 'true');
     }
 
-    // Pega os parâmetros atuais da URL para comparação
     const currentParams = new URLSearchParams(searchParams.toString());
 
-    // Atualiza a URL apenas se os novos parâmetros forem diferentes dos atuais
-    // Isso evita atualizações desnecessárias e potenciais loops.
     if (params.toString() !== currentParams.toString()) {
-        // router.replace atualiza a URL sem adicionar uma nova entrada no histórico do navegador.
         router.replace(`${pathname}?${params.toString()}`);
     }
     
-    // Desativa a flag após a atualização
     setTimeout(() => {
       isUpdatingUrl.current = false;
     }, 0);
+  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, pathname, router, searchParams]);
 
-  // Dependências do efeito: monitora todas as variáveis de filtro e página do Zustand.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, pathname, router]);
-
-  // --- Efeito 3: Busca de Dados da API --- //
-  // Executa sempre que os filtros ou a página mudam (após os efeitos anteriores).
-  // Dispara a busca dos dados na API do backend.
+  // Busca dados da API
   useEffect(() => {
     const fetchData = async () => {
-      const startTime = Date.now(); // Marca o tempo de início
+      const startTime = Date.now();
       setRoomsLoadingError([], null, true, null);
       const params = new URLSearchParams();
       if (name) params.set('name', name);
@@ -196,7 +171,6 @@ function SearchPageContent() {
       let paginationData = null;
       let errorData = null;
 
-      // Define a URL base da API backend
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
       try {
@@ -219,7 +193,7 @@ function SearchPageContent() {
       }
 
       const elapsedTime = Date.now() - startTime;
-      const remainingTime = 1000 - elapsedTime; // 1000ms = 1 segundo
+      const remainingTime = 1000 - elapsedTime;
 
       if (remainingTime > 0) {
         setTimeout(() => {
@@ -231,12 +205,9 @@ function SearchPageContent() {
     };
 
     fetchData();
-  // Dependências: busca novamente sempre que um filtro relevante ou a página mudar.
   }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, setRoomsLoadingError]);
 
-  // Renderização da UI principal, dividida em filtros (aside) e resultados (main)
   return (
-    // Container principal da página de busca
     <Container 
       maxWidth="xl" 
       sx={{ 
@@ -253,22 +224,19 @@ function SearchPageContent() {
         justifyContent: 'flex-start',
         alignItems: 'flex-start'
       }}>
-        {/* Sidebar de Filtros */}
         <Box sx={{ width: { xs: '100%', lg: '280px' }, mb: { xs: 4, lg: 0 } }}>
-          {/* O top-24 considera a altura do header (h-16) + um espaçamento */}
           <Filters />
         </Box>
-        {/* Conteúdo Principal: Contagem, Lista e Paginação */}
         <Box sx={{ width: { xs: '100%', lg: 'calc(100% - 300px)' } }}>
           <Box mb={3} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
-            <RoomCount /> {/* Exibe a contagem de resultados */}
+            <RoomCount />
             <Box mb={{ xs: 2, sm: 0 }}>
-              <SortControls /> {/* Controles de ordenação */}
+              <SortControls />
             </Box>
           </Box>
-          <RoomList /> {/* Exibe a lista de quartos ou mensagens de status */}
+          <RoomList />
           <Box mt={4} display="flex" justifyContent="center">
-            <PaginationControls /> {/* Controles de paginação */}
+            <PaginationControls />
           </Box>
         </Box>
       </Box>
@@ -276,9 +244,6 @@ function SearchPageContent() {
   );
 }
 
-// Componente principal da página exportado
-// Utiliza Suspense para lidar com o carregamento inicial dos hooks de navegação (como useSearchParams)
-// dentro do SearchPageContent.
 export default function HomePage() {
   return (
     <Suspense fallback={<Box sx={{ p: 2 }}>Carregando filtros...</Box>}>

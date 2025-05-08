@@ -37,7 +37,7 @@ function initDb() {
     console.log('Banco de dados vazio. Importando dados do JSON...');
     importDataFromJson(db);
   } else {
-    console.log(`Banco de dados já contém ${roomCount.count} quartos. Pulando importação.`);
+    console.log(`Banco de dados já contém ${roomCount.count} quartos.`);
   }
   
   db.close();
@@ -83,8 +83,6 @@ function importDataFromJson(db) {
           const featureRow = getFeatureId.get(feature);
           if (featureRow) {
             insertRoomFeature.run(room.id, featureRow.id);
-          } else {
-            console.warn(`Característica "${feature}" não encontrada no banco.`);
           }
         }
       }
