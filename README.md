@@ -13,6 +13,8 @@ Este projeto implementa uma aplicação web para buscar e filtrar quartos de hot
 - Carregamento automático dos filtros ao acessar uma URL com parâmetros.
 - Backend com API REST para servir os dados dos quartos.
 - Cache em memória no backend para otimizar consultas.
+- Compatível com dispositivos mobile.
+- Virtualização com Docker.
 
 ## Tecnologias Utilizadas
 

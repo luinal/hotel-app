@@ -20,11 +20,11 @@ const RoomCard: React.FC<{
   
   return (
     <div 
-      className="flex bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group overflow-hidden cursor-pointer"
+      className="flex flex-col sm:flex-row bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group overflow-hidden cursor-pointer"
       onClick={() => onClick(room)}
     >
       {/* Imagem do Quarto */}
-      <div className="w-48 md:w-64 h-40 md:h-48 bg-slate-100 flex-shrink-0 flex items-center justify-center relative">
+      <div className="w-full sm:w-48 md:w-64 h-48 sm:h-40 md:h-48 bg-slate-100 flex-shrink-0 flex items-center justify-center relative">
         {room.imageUrl ? (
           <Image 
             src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${room.imageUrl}`}
@@ -37,19 +37,26 @@ const RoomCard: React.FC<{
         ) : (
           <span className="text-slate-400 text-sm">Sem imagem</span>
         )}
+        
+        {/* Botão "Ver detalhes" sobreposto à imagem apenas em mobile */}
+        <div className="absolute bottom-3 right-3 sm:hidden">
+          <button className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+            Ver detalhes
+          </button>
+        </div>
       </div>
 
       {/* Conteúdo Textual */}
       <div className="p-5 flex-grow min-w-0 relative"> 
-        {/* Botão "Ver detalhes" no canto superior direito */}
-        <div className="absolute top-3 right-3">
+        {/* Botão "Ver detalhes" no canto superior direito - apenas em desktop */}
+        <div className="hidden sm:block absolute top-3 right-3">
           <button className="px-2 py-1 text-xs font-medium text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-colors">
             Ver detalhes
           </button>
         </div>
         
-        <h3 className={`text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1.5 truncate ${getHighlightClass('name')}`}
-            title={room.name} // Adiciona tooltip para nomes longos
+        <h3 className={`text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1.5 ${getHighlightClass('name')}`}
+            title={room.name} // Mantém o tooltip para nomes longos
         >
           {room.name}
         </h3>
@@ -121,8 +128,8 @@ const RoomSkeleton = () => {
   return (
     <div className="flex flex-col gap-6">
       {[...Array(3)].map((_, i) => ( // 3 Skeletons
-        <div key={i} className="flex bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse overflow-hidden h-40 md:h-48">
-          <div className="w-48 md:w-64 bg-slate-200 flex-shrink-0"></div> {/* Skeleton da imagem */}
+        <div key={i} className="flex flex-col sm:flex-row bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse overflow-hidden h-auto sm:h-40 md:h-48">
+          <div className="w-full sm:w-48 md:w-64 h-48 sm:h-40 md:h-48 bg-slate-200 flex-shrink-0"></div> {/* Skeleton da imagem */}
           <div className="p-5 ml-0 md:ml-5 flex-grow flex flex-col justify-between">
             <div>
               <div className="h-5 bg-slate-200 rounded w-3/4 mb-2.5"></div>

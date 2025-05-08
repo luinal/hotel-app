@@ -36,36 +36,38 @@ const SortControls: React.FC = () => {
   const selectBaseClass = "bg-white border border-slate-300 rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm";
   
   return (
-    <div className="flex items-center justify-end space-x-3">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
       <span className="text-sm font-medium text-slate-700">Ordenar por:</span>
       
-      {/* Select para o campo de ordenação */}
-      <select
-        value={orderBy}
-        onChange={handleOrderChange}
-        className={`${selectBaseClass} w-[100px]`}
-        disabled={isLoading}
-      >
-        {orderByOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      
-      {/* Select para a direção da ordenação */}
-      <select
-        value={orderDirection}
-        onChange={handleDirectionChange}
-        className={`${selectBaseClass} w-[120px]`}
-        disabled={isLoading || !orderBy}
-      >
-        {orderDirections.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center space-x-3">
+        {/* Select para o campo de ordenação */}
+        <select
+          value={orderBy}
+          onChange={handleOrderChange}
+          className={`${selectBaseClass} w-[120px]`}
+          disabled={isLoading}
+        >
+          {orderByOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        
+        {/* Select para a direção da ordenação */}
+        <select
+          value={orderDirection}
+          onChange={handleDirectionChange}
+          className={`${selectBaseClass} w-[120px]`}
+          disabled={isLoading || !orderBy}
+        >
+          {orderDirections.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };

@@ -19,9 +19,9 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
   const roomImages = useMemo(() => {
     // Array de imagens de exemplo - normalmente viria do backend
     const images = [
-      'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+1',
       'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+2',
       'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+3',
+      'https://placehold.co/600x400/e9ecef/6c757d?text=Quarto+Imagem+4',
     ];
     
     if (room?.imageUrl) {
@@ -50,17 +50,35 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
     }
   }, [isOpen, isRendered]);
   
-  // Prevenir a rolagem quando o painel está aberto
+  // Prevenir a rolagem quando o painel está aberto (apenas em mobile)
   useEffect(() => {
-    if (isOpen) {
-      // Calcula a largura da barra de rolagem
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      
-      // Adiciona padding ao body para compensar a largura da barra de rolagem e evitar saltos
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
-      // Restaura a rolagem da página
+    // Função para verificar se o dispositivo é mobile (baseado na largura da tela)
+    const isMobile = () => window.innerWidth < 640; // 640px é o breakpoint 'sm' no Tailwind
+    
+    // Função para aplicar ou remover o bloqueio de rolagem conforme o tamanho da tela
+    const updateScrollLock = () => {
+      if (isOpen) {
+        if (isMobile()) {
+          // Bloqueia rolagem em mobile
+          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+          document.body.style.overflow = 'hidden';
+          document.body.style.paddingRight = `${scrollbarWidth}px`;
+        } else {
+          // Permite rolagem em desktop
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        }
+      }
+    };
+    
+    // Aplicar configuração inicial
+    updateScrollLock();
+    
+    // Adicionar listener para responder a redimensionamentos da janela
+    window.addEventListener('resize', updateScrollLock);
+    
+    if (!isOpen) {
+      // Restaura a rolagem da página (independente do dispositivo)
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     }
@@ -69,6 +87,7 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
       // Limpeza ao desmontar
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
+      window.removeEventListener('resize', updateScrollLock);
     };
   }, [isOpen]);
   
@@ -122,7 +141,7 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
         </button>
         
         {/* Carrossel de imagens */}
-        <div className="relative h-64 bg-slate-200 overflow-hidden">
+        <div className="relative h-64 bg-slate-200 overflow-hidden mt-5">
           {/* Container do carrossel com transição horizontal */}
           <div className="h-full relative">
             {roomImages.map((imageUrl, index) => (

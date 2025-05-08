@@ -40,7 +40,7 @@ const RoomCount: React.FC = () => {
 
   // Renderiza a mensagem formatada de acordo com a contagem.
   return (
-    <div className="text-sm text-gray-600">
+    <div className="text-sm text-gray-600 font-medium pl-1">
       {count === 0
         ? 'Nenhum quarto encontrado'
         : count === 1

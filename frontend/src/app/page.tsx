@@ -230,9 +230,13 @@ function SearchPageContent() {
         </aside>
         {/* Conteúdo Principal: Contagem, Lista e Paginação */}
         <main className="flex-1 min-w-0">
-          <div className="mb-6 flex items-center justify-between">
-            <RoomCount /> {/* Exibe a contagem de resultados */}
-            <SortControls /> {/* Controles de ordenação */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="order-2 sm:order-1 mb-0 sm:mb-0 pl-1">
+              <RoomCount /> {/* Exibe a contagem de resultados */}
+            </div>
+            <div className="order-1 sm:order-2 min-h-[76px] sm:min-h-0 mb-2 sm:mb-0">
+              <SortControls /> {/* Controles de ordenação */}
+            </div>
           </div>
           <RoomList /> {/* Exibe a lista de quartos ou mensagens de status */}
           <div className="mt-8 flex justify-center">
