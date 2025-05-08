@@ -46,6 +46,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           
+          // Adicionar delay de 2 segundos para simular requisição
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
           const response = await fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
@@ -79,6 +82,9 @@ export const useAuthStore = create<AuthState>()(
       register: async (name: string, email: string, password: string) => {
         try {
           set({ isLoading: true, error: null });
+          
+          // Adicionar delay de 2 segundos para simular requisição
+          await new Promise(resolve => setTimeout(resolve, 2000));
           
           const response = await fetch(`${API_URL}/api/auth/register`, {
             method: 'POST',

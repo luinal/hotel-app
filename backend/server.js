@@ -32,11 +32,14 @@ app.use(express.static('public'));
 // Cache em memória com TTL (Time To Live) de 5 minutos
 const cache = new NodeCache({ stdTTL: 300 });
 
-// Verificar se o banco de dados existe, se não, executar script de inicialização
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'hotel.db');
-if (!fs.existsSync(dbPath)) {
-  console.log('Banco de dados não encontrado. Executando inicialização...');
-  require('./init-db');
+// O módulo db.js agora verifica e inicializa o banco de dados quando necessário
+try {
+  // Fazendo uma conexão inicial para garantir que o banco está pronto
+  const testConnection = db.connect();
+  testConnection.close();
+  console.log('Conexão com o banco de dados estabelecida com sucesso.');
+} catch (error) {
+  console.error('Erro ao conectar ao banco de dados:', error);
 }
 
 // Middleware para autenticar token

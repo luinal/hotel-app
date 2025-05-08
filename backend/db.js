@@ -1,15 +1,46 @@
 // Módulo para gerenciar a conexão com o banco de dados SQLite
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
 // Caminho para o banco de dados (usa variável de ambiente ou caminho padrão)
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'hotel.db');
 
 // Criar conexão com o banco de dados
 function connect() {
-  const db = new Database(dbPath, { fileMustExist: true });
-  db.pragma('foreign_keys = ON');
-  return db;
+  // Verificar se o banco de dados existe
+  const dbExists = fs.existsSync(dbPath);
+  
+  // Se não existir, inicializar o banco de dados
+  if (!dbExists) {
+    console.log('Banco de dados não encontrado. Executando inicialização...');
+    try {
+      require('./init-db');
+    } catch (error) {
+      console.error('Erro ao inicializar banco de dados:', error);
+    }
+  }
+  
+  try {
+    // Usar fileMustExist apenas se o banco já existir
+    const db = new Database(dbPath, { fileMustExist: dbExists });
+    db.pragma('foreign_keys = ON');
+    return db;
+  } catch (error) {
+    console.error('Erro ao conectar com o banco de dados:', error);
+    // Em caso de falha, tenta criar um novo banco de dados
+    if (error.code === 'SQLITE_CANTOPEN') {
+      console.log('Tentando criar um novo banco de dados...');
+      try {
+        require('./init-db');
+        return new Database(dbPath);
+      } catch (initError) {
+        console.error('Falha ao criar banco de dados:', initError);
+        throw initError;
+      }
+    }
+    throw error;
+  }
 }
 
 // Funções para quartos
@@ -206,5 +237,6 @@ module.exports = {
   createUser,
   getFavorites,
   addFavorite,
-  removeFavorite
+  removeFavorite,
+  connect
 }; 
