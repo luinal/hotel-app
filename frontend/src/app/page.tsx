@@ -24,7 +24,7 @@ function SearchPageContent() {
   // Seletores para obter o estado e as ações da store Zustand
   const {
     name, priceMin, priceMax, capacity, features, page,
-    orderBy, orderDirection,
+    orderBy, orderDirection, favoriteOnly,
     setFilters,
     setRoomsLoadingError
   } = useFilterStore();
@@ -102,6 +102,15 @@ function SearchPageContent() {
       initialUpdate.orderDirection = params.get('orderDirection') === 'desc' ? 'desc' : 'asc';
       needsUpdate = true;
     }
+    
+    // Check favorites filter
+    if (params.has('favoriteOnly')) {
+      const urlFavoriteOnly = params.get('favoriteOnly') === 'true';
+      if (urlFavoriteOnly !== favoriteOnly) {
+        initialUpdate.favoriteOnly = urlFavoriteOnly;
+        needsUpdate = true;
+      }
+    }
 
     if (needsUpdate) {
       setFilters(initialUpdate);
@@ -111,7 +120,7 @@ function SearchPageContent() {
     setTimeout(() => {
       isUpdatingFromUrl.current = false;
     }, 0);
-  }, [searchParams, name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, setFilters]);
+  }, [searchParams, name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, setFilters]);
 
   // --- Efeito 2: Atualização da URL a partir dos Filtros --- //
   // Executa sempre que qualquer filtro (name, priceMin, etc.) ou a página mudar no estado Zustand.
@@ -135,6 +144,9 @@ function SearchPageContent() {
       params.set('orderBy', orderBy);
       params.set('orderDirection', orderDirection);
     }
+    if (favoriteOnly) {
+      params.set('favoriteOnly', 'true');
+    }
 
     // Pega os parâmetros atuais da URL para comparação
     const currentParams = new URLSearchParams(searchParams.toString());
@@ -153,7 +165,7 @@ function SearchPageContent() {
 
   // Dependências do efeito: monitora todas as variáveis de filtro e página do Zustand.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, pathname, router]);
+  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, pathname, router]);
 
   // --- Efeito 3: Busca de Dados da API --- //
   // Executa sempre que os filtros ou a página mudam (após os efeitos anteriores).
@@ -175,6 +187,9 @@ function SearchPageContent() {
       if (orderBy) {
         params.set('orderBy', orderBy);
         params.set('orderDirection', orderDirection);
+      }
+      if (favoriteOnly) {
+        params.set('favoriteOnly', 'true');
       }
 
       let roomsData = [];
@@ -217,7 +232,7 @@ function SearchPageContent() {
 
     fetchData();
   // Dependências: busca novamente sempre que um filtro relevante ou a página mudar.
-  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, setRoomsLoadingError]);
+  }, [name, priceMin, priceMax, capacity, features, page, orderBy, orderDirection, favoriteOnly, setRoomsLoadingError]);
 
   // Renderização da UI principal, dividida em filtros (aside) e resultados (main)
   return (

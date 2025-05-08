@@ -5,7 +5,8 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '../theme';
-import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
+import Header from '@/components/Header';
+import { Container, Box, Typography } from '@mui/material';
 
 // Carrega a fonte Inter usando o sistema de fontes do Next.js
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
@@ -26,14 +27,7 @@ export default function RootLayout({
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <AppBar position="sticky" color="default" elevation={1}>
-              <Toolbar>
-                <Typography marginLeft={8} fontSize={28} variant="h6" component="h1" color="primary" fontWeight={700} sx={{ flexGrow: 1 }}>
-                  HotelApp
-                </Typography>
-                {/* Espaço para navegação futura, se necessário */}
-              </Toolbar>
-            </AppBar>
+            <Header />
             <Box component="main" sx={{ py: { xs: 4, sm: 6 } }}>
               {/* O conteúdo da página será inserido aqui */}
               {children}

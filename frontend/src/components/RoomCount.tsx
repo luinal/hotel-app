@@ -25,9 +25,10 @@ const LoadingText: React.FC = () => {
       sx={{ 
         color: 'primary.main',
         fontWeight: 500,
+        fontSize: 16,
       }}
     >
-      Buscando{dots}<span style={{ visibility: 'hidden' }}>....</span>
+      Buscando{dots}<span style={{ visibility: 'hidden', fontSize: 16 }}>....</span>
     </Typography>
   );
 };
@@ -53,10 +54,11 @@ const RoomCount: React.FC = () => {
         color: 'text.secondary',
         fontWeight: 500,
         pl: 1,
+        fontSize: 16,
       }}
     >
       {count === 0
-        ? 'Nenhum quarto encontrado'
+        ? '+'
         : count === 1
         ? '1 quarto encontrado'
         : `${count} quartos encontrados`} { /* Pluralização simples */}

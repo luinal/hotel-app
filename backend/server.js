@@ -121,8 +121,12 @@ app.get('/rooms', (req, res) => {
 
   const totalRooms = filteredRooms.length;
   const paginatedRooms = filteredRooms.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(totalRooms / limit);
-
+  
+  // Corrigir cálculo de totalPages
+  // Se totalRooms for menor que limit, então totalPages deve ser 1
+  // Caso contrário, calcular normalmente
+  const totalPages = totalRooms <= limit ? 1 : Math.ceil(totalRooms / limit);
+  
   const result = {
     rooms: paginatedRooms,
     pagination: {

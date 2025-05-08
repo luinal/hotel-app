@@ -8,6 +8,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckIcon from '@mui/icons-material/Check';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { useAuthStore } from '@/store/auth';
 
 interface RoomDetailPanelProps {
   room: Room | null;
@@ -20,6 +23,8 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
   const [isRendered, setIsRendered] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  
+  const { isAuthenticated, toggleFavorite, isFavorite } = useAuthStore();
   
   // Criar um array de imagens que inclui a imagem do quarto (se existir) e as imagens placeholder
   const roomImages = useMemo(() => {
@@ -157,22 +162,46 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
           willChange: 'transform',
         }}
       >
-        {/* Botão de fechar */}
-        <IconButton 
-          onClick={onClose}
-          sx={{ 
-            position: 'absolute', 
-            top: 12, 
-            right: 12, 
-            bgcolor: 'background.paper',
-            boxShadow: 1,
-            zIndex: 10,
-            '&:hover': { bgcolor: 'grey.100' }
-          }}
-          aria-label="Fechar painel"
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
+        {/* Actions row at the top */}
+        <Box sx={{ 
+          position: 'absolute', 
+          top: 12, 
+          right: 12, 
+          display: 'flex',
+          gap: 1,
+          zIndex: 10
+        }}>
+          {/* Favorite button */}
+          {isAuthenticated && room && (
+            <IconButton
+              onClick={() => toggleFavorite(room.id)}
+              sx={{ 
+                bgcolor: 'background.paper',
+                boxShadow: 1,
+                '&:hover': { bgcolor: 'grey.100' }
+              }}
+              aria-label={isFavorite(room?.id || 0) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            >
+              {isFavorite(room?.id || 0) ? 
+                <FavoriteIcon color="primary" /> : 
+                <FavoriteBorderIcon />
+              }
+            </IconButton>
+          )}
+          
+          {/* Close button */}
+          <IconButton 
+            onClick={onClose}
+            sx={{ 
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              '&:hover': { bgcolor: 'grey.100' }
+            }}
+            aria-label="Fechar painel"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
         
         {/* Carrossel de imagens */}
         <Box sx={{ 

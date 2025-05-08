@@ -28,6 +28,7 @@ export interface FilterState {
   priceMax: string;
   capacity: string;
   features: { [key: string]: boolean };
+  favoriteOnly: boolean;
   page: number;
   orderBy: OrderBy;
   orderDirection: OrderDirection;
@@ -35,10 +36,11 @@ export interface FilterState {
   pagination: PaginationInfo | null;
   isLoading: boolean;
   error: string | null;
-  setFilters: (partialFilters: Partial<Omit<FilterState, 'setFilters' | 'clearFilters' | 'setPage' | 'setRoomsLoadingError' | 'setOrder'>>) => void;
+  setFilters: (partialFilters: Partial<Omit<FilterState, 'setFilters' | 'clearFilters' | 'setPage' | 'setRoomsLoadingError' | 'setOrder' | 'setFavoriteOnly'>>) => void;
   clearFilters: () => void;
   setPage: (page: number) => void;
   setOrder: (orderBy: OrderBy, orderDirection: OrderDirection) => void;
+  setFavoriteOnly: (favoriteOnly: boolean) => void;
   setRoomsLoadingError: (rooms: Room[], pagination: PaginationInfo | null, isLoading: boolean, error: string | null) => void;
 }
 
@@ -64,6 +66,7 @@ const initialFilters = {
     acc[key] = false;
     return acc;
   }, {} as { [key: string]: boolean }),
+  favoriteOnly: false,
   page: 1,
   orderBy: '' as OrderBy,
   orderDirection: 'asc' as OrderDirection,
@@ -96,18 +99,20 @@ export const useFilterStore = create<FilterState>()(
         // Guarda os valores atuais de ordenação
         const currentOrderBy = state.orderBy;
         const currentOrderDirection = state.orderDirection;
+        const currentFavoriteOnly = state.favoriteOnly;
         
         // Limpa completamente o estado e define para os valores iniciais
         Object.keys(initialFilters).forEach(key => {
-          if (key !== 'orderBy' && key !== 'orderDirection') {
+          if (key !== 'orderBy' && key !== 'orderDirection' && key !== 'favoriteOnly') {
             // @ts-expect-error - Necessário para acessar as propriedades dinamicamente
             state[key] = structuredClone(initialFilters[key as keyof typeof initialFilters]);
           }
         });
         
-        // Restaura os valores de ordenação
+        // Restaura os valores de ordenação e favoritos
         state.orderBy = currentOrderBy;
         state.orderDirection = currentOrderDirection;
+        state.favoriteOnly = currentFavoriteOnly;
         
         // Limpa resultados e erro ao limpar filtros
         state.rooms = [];
@@ -130,6 +135,16 @@ export const useFilterStore = create<FilterState>()(
         state.orderBy = orderBy;
         state.orderDirection = orderDirection;
         // Limpa resultados e erro ao mudar ordenação para forçar nova busca
+        state.rooms = [];
+        state.pagination = null;
+        state.error = null;
+      }),
+      
+    setFavoriteOnly: (favoriteOnly) =>
+      set((state) => {
+        state.favoriteOnly = favoriteOnly;
+        // Reset to first page and clear results when toggling favorites filter
+        state.page = 1;
         state.rooms = [];
         state.pagination = null;
         state.error = null;

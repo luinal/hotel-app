@@ -18,8 +18,11 @@ import {
   Skeleton,
   Grid,
   Alert,
-  AlertTitle
+  AlertTitle,
+  IconButton
 } from '@mui/material';
+import { FavoriteBorder, Favorite } from '@mui/icons-material';
+import { useAuthStore } from '@/store/auth';
 
 // Componente para renderizar um único card de quarto.
 // Recebe as informações do quarto via props.
@@ -28,10 +31,20 @@ const RoomCard: React.FC<{
   onClick: (room: Room) => void; 
 }> = ({ room, onClick }) => {
   const { orderBy } = useFilterStore();
+  const { isAuthenticated, toggleFavorite, isFavorite } = useAuthStore();
+  
+  const isFavorited = isFavorite(room.id);
   
   // Adiciona destaque ao campo que está sendo usado para ordenação
   const getHighlightStyle = (field: string) => {
     return orderBy === field ? { fontWeight: 700, color: 'primary.main' } : {};
+  };
+  
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering card click
+    if (isAuthenticated) {
+      toggleFavorite(room.id);
+    }
   };
   
   return (
@@ -82,6 +95,28 @@ const RoomCard: React.FC<{
           </Box>
         )}
         
+        {/* Botão de favorito sobreposto à imagem */}
+        {isAuthenticated && (
+          <IconButton
+            onClick={handleFavoriteClick}
+            sx={{ 
+              position: 'absolute', 
+              top: 8, 
+              right: 8, 
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              boxShadow: 1,
+              '&:hover': { 
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+              }
+            }}
+          >
+            {isFavorited ? 
+              <Favorite color="primary" /> : 
+              <FavoriteBorder />
+            }
+          </IconButton>
+        )}
+        
         {/* Botão "Ver detalhes" sobreposto à imagem apenas em mobile */}
         <Box 
           sx={{ 
@@ -112,11 +147,11 @@ const RoomCard: React.FC<{
         flexGrow: 1, 
         position: 'relative', 
         p: 2.5, 
-        height: { sm: '10rem', md: '12rem' },
+        height: { xs: 'auto', sm: '10rem', md: '12rem' },
         boxSizing: 'border-box',
-        overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        justifyContent: 'space-between'
       }}>
         {/* Botão "Ver detalhes" no canto superior direito - apenas em desktop */}
         <Box 
@@ -185,14 +220,19 @@ const RoomCard: React.FC<{
           sx={{ 
             mb: 1.5, 
             color: 'text.secondary',
-            ...getHighlightStyle('capacity') 
+            ...getHighlightStyle('capacity'),
+            marginTop: 0.5, 
           }}
         >
           Capacidade: {room.capacity} pessoa{room.capacity > 1 ? 's' : ''}
         </Typography>
         
         {room.features.length > 0 && (
-          <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{ 
+            mt: 1.5, 
+            display: { xs: 'block', sm: 'block' }, 
+            marginTop: 0,
+          }}>
             <Typography 
               variant="caption" 
               component="h4" 
@@ -309,7 +349,8 @@ const RoomSkeleton = () => {
 // Componente principal que exibe a lista de quartos ou mensagens de status.
 const RoomList: React.FC = () => {
   // Obtém o estado relevante da store Zustand: lista de quartos, status de loading, erro e informações de paginação.
-  const { rooms, isLoading, error, pagination, orderBy, orderDirection } = useFilterStore();
+  const { rooms, isLoading, error, pagination, orderBy, orderDirection, favoriteOnly } = useFilterStore();
+  const { favorites, isAuthenticated } = useAuthStore();
   
   // Estado para controlar qual quarto está selecionado e se o painel de detalhes está aberto
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -325,10 +366,18 @@ const RoomList: React.FC = () => {
     }
   }, [isLoading, rooms, isPanelInitialized]);
   
-  // Memoriza a lista ordenada para evitar re-ordenação a cada renderização
-  const sortedRooms = useMemo(() => {
-    return sortRooms(rooms, orderBy, orderDirection);
-  }, [rooms, orderBy, orderDirection]);
+  // Memoriza a lista ordenada e filtrada para evitar re-ordenação a cada renderização
+  const sortedAndFilteredRooms = useMemo(() => {
+    let filteredRooms = [...rooms];
+    
+    // Apply favorites filter if enabled
+    if (favoriteOnly && isAuthenticated) {
+      filteredRooms = filteredRooms.filter(room => favorites.includes(room.id));
+    }
+    
+    // Apply sorting
+    return sortRooms(filteredRooms, orderBy, orderDirection);
+  }, [rooms, orderBy, orderDirection, favoriteOnly, favorites, isAuthenticated]);
 
   // Abre o painel de detalhes com o quarto selecionado
   const handleRoomClick = (room: Room) => {
@@ -378,7 +427,7 @@ const RoomList: React.FC = () => {
   // 3. Nenhum Resultado:
   // Se o total de quartos for zero (após o carregamento completo e sem erros),
   // exibe uma mensagem indicando que nenhum quarto foi encontrado.
-  if (pagination.totalRooms === 0) {
+  if (pagination.totalRooms === 0 || (favoriteOnly && sortedAndFilteredRooms.length === 0)) {
     return (
       <Alert 
         severity="info" 
@@ -394,9 +443,13 @@ const RoomList: React.FC = () => {
           bgcolor: 'grey.50'
         }}
       >
-        <AlertTitle sx={{ fontSize: '1.1rem', fontWeight: 500 }}>Nenhum Quarto Encontrado</AlertTitle>
+        <AlertTitle sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+          {favoriteOnly ? 'Nenhum Favorito Encontrado' : 'Nenhum Quarto Encontrado'}
+        </AlertTitle>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          Tente ajustar seus filtros ou pesquisar por outros termos.
+          {favoriteOnly 
+            ? 'Você ainda não adicionou nenhum quarto aos favoritos.' 
+            : 'Tente ajustar seus filtros ou pesquisar por outros termos.'}
         </Typography>
       </Alert>
     );
@@ -406,7 +459,7 @@ const RoomList: React.FC = () => {
   return (
     <>
       <Stack spacing={3}>
-        {sortedRooms.map((room) => (
+        {sortedAndFilteredRooms.map((room) => (
           <RoomCard 
             key={room.id} 
             room={room} 

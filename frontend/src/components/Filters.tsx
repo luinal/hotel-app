@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useFilterStore, availableFeatures, FilterState } from '@/store/filters';
+import { useAuthStore } from '@/store/auth';
 import { useDebouncedCallback } from 'use-debounce';
 import { 
   Box, 
@@ -14,8 +15,10 @@ import {
   InputLabel, 
   Checkbox, 
   FormControlLabel, 
-  Paper
+  Paper,
+  Divider
 } from '@mui/material';
+import { Favorite } from '@mui/icons-material';
 
 // Componente que renderiza a seção de filtros da aplicação.
 const Filters: React.FC = () => {
@@ -25,10 +28,14 @@ const Filters: React.FC = () => {
     priceMin: storePriceMin,
     priceMax: storePriceMax,
     capacity, features,
+    favoriteOnly: storeFavoriteOnly,
     setFilters, clearFilters,
     setRoomsLoadingError,
-    isLoading
+    isLoading,
+    setFavoriteOnly
   } = useFilterStore();
+  
+  const { isAuthenticated, favorites } = useAuthStore();
 
   // --- Estado Local para Inputs ---
   // Inicializa o estado local apenas uma vez e depois o mantém independente
@@ -37,6 +44,7 @@ const Filters: React.FC = () => {
   const [localPriceMax, setLocalPriceMax] = useState(storePriceMax || '');
   const [localCapacity, setLocalCapacity] = useState(capacity || '');
   const [localFeatures, setLocalFeatures] = useState<FilterState['features']>({...features});
+  const [localFavoriteOnly, setLocalFavoriteOnly] = useState(storeFavoriteOnly);
   
   // Determina se algum filtro está ativo usando os estados locais para inputs controlados localmente
   const isAnyFilterActive = 
@@ -44,7 +52,8 @@ const Filters: React.FC = () => {
     localPriceMin !== '' || 
     localPriceMax !== '' || 
     localCapacity !== '' || 
-    Object.values(localFeatures).some(isActive => isActive);
+    Object.values(localFeatures).some(isActive => isActive) ||
+    localFavoriteOnly;
     
   // Controla se a store deve atualizar o input (apenas na inicialização ou no clearFilters)
   const shouldSyncFromStore = useRef(true);
@@ -91,9 +100,10 @@ const Filters: React.FC = () => {
       setLocalPriceMax(storePriceMax ? formatCurrency(storePriceMax.replace('.', '').padEnd(storePriceMax.includes('.') ? 3 : 1, '0')) : '');
       setLocalCapacity(capacity || '');
       setLocalFeatures({...features});
+      setLocalFavoriteOnly(storeFavoriteOnly);
       shouldSyncFromStore.current = false;
     }
-  }, [storeName, storePriceMin, storePriceMax, capacity, features]);
+  }, [storeName, storePriceMin, storePriceMax, capacity, features, storeFavoriteOnly]);
 
   // Re-habilita a sincronização quando os filtros são limpos
   const handleClearFilters = () => {
@@ -106,6 +116,7 @@ const Filters: React.FC = () => {
       acc[key] = false;
       return acc;
     }, {} as FilterState['features']));
+    setLocalFavoriteOnly(false);
     
     // Reativa a sincronização para garantir que os estados locais 
     // sejam atualizados após o clearFilters
@@ -113,6 +124,21 @@ const Filters: React.FC = () => {
     
     // Depois limpa os filtros na store para atualização do estado global
     clearFilters();
+    
+    // Explicitly set favoriteOnly to false
+    setFavoriteOnly(false);
+  };
+
+  // Handle favorite filter toggle
+  const handleFavoriteToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.checked;
+    setLocalFavoriteOnly(newValue);
+    
+    // Activate loading
+    setRoomsLoadingError([], null, true, null);
+    
+    // Update store
+    setFavoriteOnly(newValue);
   };
 
   // --- Lógica de Debounce para Atualizar a Store Zustand ---
@@ -203,6 +229,7 @@ const Filters: React.FC = () => {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+
         {/* Input: Nome do Quarto */}
         <Box>
           <TextField
@@ -283,6 +310,38 @@ const Filters: React.FC = () => {
             </Select>
           </FormControl>
         </Box>
+
+        {/* Favorite Filter - Only visible when authenticated */}
+        {isAuthenticated && (
+          <>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={localFavoriteOnly}
+                  onChange={handleFavoriteToggle}
+                  icon={<Favorite />}
+                  checkedIcon={<Favorite />}
+                  color="primary"
+                  sx={{ p: 1, cursor: 'pointer' }}
+                />
+              }
+              sx={{ my: -1.5, cursor: 'default' }}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography variant="body2" fontWeight={500} sx={{ cursor: 'pointer' }}>
+                    Favoritos
+                  </Typography>
+                  {favorites.length > 0 && !localFavoriteOnly && (
+                    <Typography variant="caption" sx={{ ml: 1, bgcolor: 'primary.main', color: 'white', px: 1, py: 0.5, borderRadius: 1 }}>
+                      {favorites.length}
+                    </Typography>
+                  )}
+                </Box>
+              }
+            />
+            <Divider />
+          </>
+        )}
 
         {/* Checkboxes: Características */}
         <Box>
