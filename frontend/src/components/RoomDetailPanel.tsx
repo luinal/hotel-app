@@ -3,6 +3,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Room } from '@/store/filters';
 import Image from 'next/image';
+import { Box, Typography, Button, IconButton, Paper, Divider } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckIcon from '@mui/icons-material/Check';
 
 interface RoomDetailPanelProps {
   room: Room | null;
@@ -13,6 +18,7 @@ interface RoomDetailPanelProps {
 const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isRendered, setIsRendered] = useState(false);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   
   // Criar um array de imagens que inclui a imagem do quarto (se existir) e as imagens placeholder
@@ -38,35 +44,25 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
     setActiveImageIndex(0);
   }, [room]);
   
-  // Garantir que o componente seja adequadamente renderizado antes de aplicar transições
+  // Efeito para gerenciar a rolagem e inicializar a renderização
   useEffect(() => {
+    // Garantir que o componente seja adequadamente renderizado antes de aplicar transições
     if (!isRendered) {
       setIsRendered(true);
     }
-
-    if (isOpen && panelRef.current) {
-      // Força um reflow para garantir que o browser processe a mudança de posição
-      panelRef.current.getBoundingClientRect();
-    }
-  }, [isOpen, isRendered]);
-  
-  // Prevenir a rolagem quando o painel está aberto (apenas em mobile)
-  useEffect(() => {
-    // Função para verificar se o dispositivo é mobile (baseado na largura da tela)
-    const isMobile = () => window.innerWidth < 640; // 640px é o breakpoint 'sm' no Tailwind
     
-    // Função para aplicar ou remover o bloqueio de rolagem conforme o tamanho da tela
+    // Função para verificar se o dispositivo é mobile
+    const isMobile = () => window.innerWidth < 600;
+    
+    // Função para aplicar ou remover o bloqueio de rolagem
     const updateScrollLock = () => {
       if (isOpen) {
         if (isMobile()) {
           // Bloqueia rolagem em mobile
-          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
           document.body.style.overflow = 'hidden';
-          document.body.style.paddingRight = `${scrollbarWidth}px`;
         } else {
           // Permite rolagem em desktop
           document.body.style.overflow = '';
-          document.body.style.paddingRight = '';
         }
       }
     };
@@ -74,22 +70,37 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
     // Aplicar configuração inicial
     updateScrollLock();
     
-    // Adicionar listener para responder a redimensionamentos da janela
+    // Adicionar listener para redimensionamentos
     window.addEventListener('resize', updateScrollLock);
     
     if (!isOpen) {
-      // Restaura a rolagem da página (independente do dispositivo)
+      // Restaura a rolagem da página
       document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
     }
     
     return () => {
       // Limpeza ao desmontar
       document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
       window.removeEventListener('resize', updateScrollLock);
     };
-  }, [isOpen]);
+  }, [isOpen, isRendered]);
+  
+  // Gerenciar cliques fora do painel para fechá-lo
+  useEffect(() => {
+    const handleBackdropClick = (e: MouseEvent) => {
+      if (backdropRef.current && e.target === backdropRef.current) {
+        onClose();
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('click', handleBackdropClick);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleBackdropClick);
+    };
+  }, [isOpen, onClose]);
   
   // Se não houver quarto selecionado, não renderize nada
   if (!room) return null;
@@ -112,43 +123,77 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
   
   return (
     <>
-      {/* Overlay escuro atrás do painel */}
-      <div 
-        className={`fixed inset-0 transition-opacity duration-500 z-40 ${
-          isOpen ? 'opacity-0' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={onClose}
-        aria-hidden="true"
+      {/* Overlay transparente que intercepta cliques */}
+      <Box
+        ref={backdropRef}
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1300,
+          visibility: isOpen ? 'visible' : 'hidden',
+          pointerEvents: isOpen ? 'auto' : 'none',
+          transition: 'visibility 0.5s ease'
+        }}
       />
       
-      {/* Painel deslizante - início com translateX(100%) e depois aplica a classe ativa */}
-      <div 
+      {/* Painel deslizante */}
+      <Box
         ref={panelRef}
-        className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-xl z-50 transform ${isRendered ? 'transition-transform duration-500 ease-in-out' : ''} overflow-y-auto ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{ willChange: 'transform' }} // Melhora performance da animação
+        sx={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: { xs: '100%', sm: '400px' },
+          bgcolor: 'background.paper',
+          boxShadow: '-4px 0 8px rgba(0, 0, 0, 0.1)',
+          zIndex: 1400,
+          overflow: 'auto',
+          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+          transition: isRendered ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+          willChange: 'transform',
+        }}
       >
-        {/* Botão de fechar no canto superior */}
-        <button 
+        {/* Botão de fechar */}
+        <IconButton 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white shadow-md hover:bg-slate-100 z-10"
+          sx={{ 
+            position: 'absolute', 
+            top: 12, 
+            right: 12, 
+            bgcolor: 'background.paper',
+            boxShadow: 1,
+            zIndex: 10,
+            '&:hover': { bgcolor: 'grey.100' }
+          }}
           aria-label="Fechar painel"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          <CloseIcon fontSize="small" />
+        </IconButton>
         
         {/* Carrossel de imagens */}
-        <div className="relative h-64 bg-slate-200 overflow-hidden mt-5">
+        <Box sx={{ 
+          position: 'relative', 
+          height: 260, 
+          bgcolor: 'grey.100', 
+          overflow: 'hidden',
+          mt: { xs: 4, sm: 4 }
+        }}>
           {/* Container do carrossel com transição horizontal */}
-          <div className="h-full relative">
+          <Box sx={{ height: '100%', position: 'relative' }}>
             {roomImages.map((imageUrl, index) => (
-              <div 
+              <Box 
                 key={index} 
-                className="absolute top-0 left-0 w-full h-full transition-transform duration-700 ease-in-out"
-                style={{ 
+                sx={{ 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  width: '100%', 
+                  height: '100%',
+                  transition: 'transform 700ms ease-in-out',
                   transform: `translateX(${(index - activeImageIndex) * 100}%)`,
                   zIndex: index === activeImageIndex ? 1 : 0
                 }}
@@ -156,123 +201,174 @@ const RoomDetailPanel: React.FC<RoomDetailPanelProps> = ({ room, isOpen, onClose
                 <Image 
                   src={imageUrl} 
                   alt={`Imagem ${index + 1} do quarto ${room.name}`}
-                  className="w-full h-full object-cover"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   width={600}
                   height={400}
                   unoptimized={true}
                 />
-              </div>
+              </Box>
             ))}
-          </div>
+          </Box>
           
           {/* Controles do carrossel */}
-          <button 
+          <IconButton 
             onClick={prevImage}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10"
+            sx={{ 
+              position: 'absolute', 
+              left: 8, 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              bgcolor: 'background.paper', 
+              '&:hover': { bgcolor: 'background.paper' },
+              boxShadow: 1,
+              zIndex: 10,
+            }}
             aria-label="Imagem anterior"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
           
-          <button 
+          <IconButton 
             onClick={nextImage}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md z-10"
+            sx={{ 
+              position: 'absolute', 
+              right: 8, 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              bgcolor: 'background.paper', 
+              '&:hover': { bgcolor: 'background.paper' },
+              boxShadow: 1,
+              zIndex: 10,
+            }}
             aria-label="Próxima imagem"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
+            <ArrowForwardIcon fontSize="small" />
+          </IconButton>
           
           {/* Indicadores de imagem */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
+          <Box sx={{ 
+            position: 'absolute', 
+            bottom: 16, 
+            left: 0, 
+            right: 0, 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 1,
+            zIndex: 10,
+          }}>
             {roomImages.map((_, idx) => (
-              <button 
+              <Box 
                 key={idx}
+                component="button"
                 onClick={() => setActiveImageIndex(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                  idx === activeImageIndex ? 'bg-white' : 'bg-white/50'
-                }`}
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  bgcolor: idx === activeImageIndex ? 'common.white' : 'rgba(255, 255, 255, 0.5)',
+                  border: 'none',
+                  p: 0,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s'
+                }}
                 aria-label={`Ver imagem ${idx + 1}`}
               />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
         
         {/* Conteúdo principal */}
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">{room.name}</h2>
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h5" fontWeight={700} color="text.primary" sx={{ mb: 1 }}>
+            {room.name}
+          </Typography>
           
-          <div className="flex items-center mb-6">
-            <span className="text-xl font-bold text-indigo-600 mr-2">
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6" fontWeight={700} color="primary" sx={{ mr: 1 }}>
               R$ {room.price.toFixed(2).replace('.',',')}
-            </span>
-            <span className="text-sm text-slate-500">por noite</span>
-          </div>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              por noite
+            </Typography>
+          </Box>
           
           {/* Detalhes do quarto */}
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">Detalhes</h3>
-              <div className="bg-slate-50 p-4 rounded-lg space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Capacidade:</span>
-                  <span className="font-medium text-slate-800">{room.capacity} pessoa{room.capacity > 1 ? 's' : ''}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Disponibilidade:</span>
-                  <span className="font-medium text-green-600">Disponível</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Tamanho:</span>
-                  <span className="font-medium text-slate-800">{30 + (room.capacity * 5)} m²</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Comodidades */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">Comodidades</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {room.features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Descrição */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">Descrição</h3>
-              <p className="text-slate-600 leading-relaxed">
-                {room.description ? room.description : `
-                  Desfrute de uma estadia confortável neste quartos espaçoso e elegante.
-                  Perfeito para ${room.capacity === 1 ? 'viajantes solo' : room.capacity <= 2 ? 'casais' : 'famílias'}, 
-                  este quarto oferece o equilíbrio perfeito entre conforto e estilo.
-                  Com decoração requintada e todas as comodidades modernas, garantimos uma 
-                  experiência memorável durante sua estadia.
-                `}
-              </p>
-            </div>
-          </div>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ mb: 1 }}>
+              Detalhes
+            </Typography>
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2" color="text.primary">Capacidade:</Typography>
+                <Typography variant="body2" fontWeight={500}>
+                  {room.capacity} pessoa{room.capacity > 1 ? 's' : ''}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2" color="text.primary">Disponibilidade:</Typography>
+                <Typography variant="body2" fontWeight={500} color="success.main">
+                  Disponível
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body2" color="text.primary">Tamanho:</Typography>
+                <Typography variant="body2" fontWeight={500}>
+                  {30 + (room.capacity * 5)} m²
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
           
-          {/* Botão de ação */}
-          <div className="mt-8">
-            <button
-              onClick={handleReserve}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
-            >
-              Reservar agora
-            </button>
-          </div>
-        </div>
-      </div>
+          {/* Comodidades */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ mb: 1 }}>
+              Comodidades
+            </Typography>
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: 1 
+            }}>
+              {room.features.map((feature, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CheckIcon fontSize="small" color="primary" />
+                  <Typography variant="body2">{feature}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+          
+          {/* Descrição */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ mb: 1 }}>
+              Descrição
+            </Typography>
+            <Typography fontSize={16} variant="body2" color="text.primary" sx={{ lineHeight: 1.6 }}>
+              {room.description ? room.description : `
+                Desfrute de uma estadia confortável neste quarto espaçoso e elegante.
+                Perfeito para ${room.capacity === 1 ? 'viajantes solo' : room.capacity <= 2 ? 'casais' : 'famílias'}, 
+                este quarto oferece o equilíbrio perfeito entre conforto e estilo.
+                Com decoração requintada e todas as comodidades modernas, garantimos uma 
+                experiência memorável durante sua estadia.
+              `}
+            </Typography>
+          </Box>
+          
+          <Divider sx={{ my: 3 }} />
+          
+          {/* Botão de reserva */}
+          <Button 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            size="large"
+            onClick={handleReserve}
+            sx={{ mt: 2 }}
+          >
+            Reservar agora
+          </Button>
+        </Box>
+      </Box>
     </>
   );
 };

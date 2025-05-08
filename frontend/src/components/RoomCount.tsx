@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFilterStore } from '@/store/filters';
+import { Box, Typography } from '@mui/material';
 
 // Componente para exibir uma mensagem de "Buscando..." com animação de pontos
 const LoadingText: React.FC = () => {
@@ -19,9 +20,15 @@ const LoadingText: React.FC = () => {
   }, []);
   
   return (
-    <div className="text-sm text-indigo-600 font-medium">
-      Buscando{dots}<span className="invisible">....</span>
-    </div>
+    <Typography 
+      variant="body2" 
+      sx={{ 
+        color: 'primary.main',
+        fontWeight: 500,
+      }}
+    >
+      Buscando{dots}<span style={{ visibility: 'hidden' }}>....</span>
+    </Typography>
   );
 };
 
@@ -40,13 +47,20 @@ const RoomCount: React.FC = () => {
 
   // Renderiza a mensagem formatada de acordo com a contagem.
   return (
-    <div className="text-sm text-gray-600 font-medium pl-1">
+    <Typography 
+      variant="body2" 
+      sx={{ 
+        color: 'text.secondary',
+        fontWeight: 500,
+        pl: 1,
+      }}
+    >
       {count === 0
         ? 'Nenhum quarto encontrado'
         : count === 1
         ? '1 quarto encontrado'
         : `${count} quartos encontrados`} { /* Pluralização simples */}
-    </div>
+    </Typography>
   );
 };
 

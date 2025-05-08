@@ -8,6 +8,7 @@ import Filters from '@/components/Filters';
 import RoomCount from '@/components/RoomCount';
 import PaginationControls from '@/components/PaginationControls';
 import SortControls from '@/components/SortControls';
+import { Container, Box } from '@mui/material';
 
 // Componente interno para encapsular a lógica que depende dos hooks de navegação,
 // permitindo o uso de Suspense na página principal.
@@ -221,30 +222,42 @@ function SearchPageContent() {
   // Renderização da UI principal, dividida em filtros (aside) e resultados (main)
   return (
     // Container principal da página de busca
-    <div className="container px-2 sm:px-4 lg:px-6">
-      <div className="flex flex-col lg:flex-row lg:space-x-4">
+    <Container 
+      maxWidth="xl" 
+      sx={{ 
+        px: { xs: 1, sm: 2, lg: 3 }, 
+        mx: 0, 
+        width: '100%', 
+        maxWidth: '100%'
+      }}
+    >
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', lg: 'row' }, 
+        gap: 2, 
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start'
+      }}>
         {/* Sidebar de Filtros */}
-        <aside className="w-full lg:w-60 xl:w-64 self-start mb-8 lg:mb-0">
+        <Box sx={{ width: { xs: '100%', lg: '280px' }, mb: { xs: 4, lg: 0 } }}>
           {/* O top-24 considera a altura do header (h-16) + um espaçamento */}
           <Filters />
-        </aside>
+        </Box>
         {/* Conteúdo Principal: Contagem, Lista e Paginação */}
-        <main className="flex-1 min-w-0">
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="order-2 sm:order-1 mb-0 sm:mb-0 pl-1">
-              <RoomCount /> {/* Exibe a contagem de resultados */}
-            </div>
-            <div className="order-1 sm:order-2 min-h-[76px] sm:min-h-0 mb-2 sm:mb-0">
+        <Box sx={{ width: { xs: '100%', lg: 'calc(100% - 300px)' } }}>
+          <Box mb={3} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+            <RoomCount /> {/* Exibe a contagem de resultados */}
+            <Box mb={{ xs: 2, sm: 0 }}>
               <SortControls /> {/* Controles de ordenação */}
-            </div>
-          </div>
+            </Box>
+          </Box>
           <RoomList /> {/* Exibe a lista de quartos ou mensagens de status */}
-          <div className="mt-8 flex justify-center">
+          <Box mt={4} display="flex" justifyContent="center">
             <PaginationControls /> {/* Controles de paginação */}
-        </div>
-      </main>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
 }
 
@@ -253,8 +266,7 @@ function SearchPageContent() {
 // dentro do SearchPageContent.
 export default function HomePage() {
   return (
-    <Suspense fallback={<div className="container mx-auto p-4">Carregando filtros...</div>}>
-      {/* Renderiza o conteúdo principal apenas quando os hooks de navegação estiverem prontos */}
+    <Suspense fallback={<Box sx={{ p: 2 }}>Carregando filtros...</Box>}>
       <SearchPageContent />
     </Suspense>
   );

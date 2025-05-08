@@ -23,7 +23,7 @@ Este projeto implementa uma aplicação web para buscar e filtrar quartos de hot
   - React
   - TypeScript
   - Zustand (Gerenciamento de estado global)
-  - Tailwind CSS (Estilização)
+  - Material UI (Estilização)
 - **Backend:**
   - Node.js
   - Express.js
@@ -56,7 +56,6 @@ hotel-app/
 │   ├── env-setup.js   # Script para configurar variáveis de ambiente
 │   ├── package.json
 │   ├── next.config.js
-│   ├── tailwind.config.ts
 │   └── ...
 ├── ENV_SETUP.md     # Documentação de variáveis de ambiente
 ├── DEPLOY.md        # Guia de deploy do projeto

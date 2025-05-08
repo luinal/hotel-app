@@ -1,6 +1,8 @@
 'use client';
 
 import { useFilterStore, OrderBy, OrderDirection } from '@/store/filters';
+import { FormControl, InputLabel, Select, MenuItem, Box, Typography, Stack } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 // Define as opções de ordenação disponíveis com rótulos em português
 const orderByOptions: { value: OrderBy; label: string }[] = [
@@ -21,54 +23,68 @@ const SortControls: React.FC = () => {
   const { orderBy, orderDirection, setOrder, isLoading } = useFilterStore();
 
   // Handler para mudanças no select de ordenação
-  const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleOrderChange = (e: SelectChangeEvent<string>) => {
     const newOrderBy = e.target.value as OrderBy;
     setOrder(newOrderBy, orderDirection);
   };
 
   // Handler para mudanças no select de direção
-  const handleDirectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDirectionChange = (e: SelectChangeEvent<string>) => {
     const newDirection = e.target.value as OrderDirection;
     setOrder(orderBy, newDirection);
   };
 
-  // Classes base para os selects
-  const selectBaseClass = "bg-white border border-slate-300 rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm";
-  
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-      <span className="text-sm font-medium text-slate-700">Ordenar por:</span>
-      
-      <div className="flex items-center space-x-3">
-        {/* Select para o campo de ordenação */}
-        <select
-          value={orderBy}
-          onChange={handleOrderChange}
-          className={`${selectBaseClass} w-[120px]`}
-          disabled={isLoading}
+    <Box>
+      <Stack 
+        direction={{ xs: 'column', sm: 'row' }} 
+        spacing={2} 
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+      >
+        <Typography
+          variant="body2"
+          sx={{ 
+            fontWeight: 500, 
+            color: 'text.secondary'
+          }}
         >
-          {orderByOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          Ordenar por:
+        </Typography>
         
-        {/* Select para a direção da ordenação */}
-        <select
-          value={orderDirection}
-          onChange={handleDirectionChange}
-          className={`${selectBaseClass} w-[120px]`}
-          disabled={isLoading || !orderBy}
-        >
-          {orderDirections.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
+        <Box display="flex" gap={2}>
+          {/* Select para o campo de ordenação */}
+          <FormControl size="small" sx={{ width: 120 }}>
+            <Select
+              value={orderBy}
+              onChange={handleOrderChange}
+              displayEmpty
+              disabled={isLoading}
+            >
+              {orderByOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          {/* Select para a direção da ordenação */}
+          <FormControl size="small" sx={{ width: 150 }}>
+            <Select
+              value={orderDirection}
+              onChange={handleDirectionChange}
+              disabled={isLoading || !orderBy}
+            >
+              {orderDirections.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Stack>
+    </Box>
   );
 };
 

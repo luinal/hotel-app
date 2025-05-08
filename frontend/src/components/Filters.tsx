@@ -3,6 +3,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useFilterStore, availableFeatures, FilterState } from '@/store/filters';
 import { useDebouncedCallback } from 'use-debounce';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  TextField, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  InputLabel, 
+  Checkbox, 
+  FormControlLabel, 
+  Paper
+} from '@mui/material';
 
 // Componente que renderiza a seção de filtros da aplicação.
 const Filters: React.FC = () => {
@@ -170,115 +183,132 @@ const Filters: React.FC = () => {
     setFilters({ [inputName]: value });
   };
 
-  const inputBaseClass = "mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm";
-  const labelBaseClass = "block text-sm font-medium text-slate-700";
-
   return (
-    <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-slate-800">Filtros</h2>
-        <button
+    <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h6" fontWeight={600} color="text.primary">Filtros</Typography>
+        <Button 
           onClick={handleClearFilters}
           disabled={!isAnyFilterActive || isLoading}
-          aria-disabled={!isAnyFilterActive || isLoading}
-          className={`text-sm font-medium transition-colors ${
-            isAnyFilterActive && !isLoading
-              ? 'text-indigo-600 hover:text-indigo-500 cursor-pointer' 
-              : 'text-slate-400 opacity-50 cursor-not-allowed'
-          }`}
+          color="primary"
+          size="small"
+          sx={{ 
+            opacity: (!isAnyFilterActive || isLoading) ? 0.5 : 1,
+            textTransform: 'none',
+            fontWeight: 500
+          }}
         >
           Limpar Filtros
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      <div className="space-y-6">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Input: Nome do Quarto */}
-        <div>
-          <label htmlFor="name" className={labelBaseClass}>Nome do Quarto</label>
-          <input
-            type="text"
+        <Box>
+          <TextField
+            fullWidth
             id="name"
             name="name"
+            label="Nome do Quarto"
             value={localName}
             onChange={handleNameInputChange}
             placeholder="Ex: Suíte Luxo"
-            className={inputBaseClass}
+            size="small"
+            variant="outlined"
           />
-        </div>
+        </Box>
 
         {/* Inputs: Faixa de Preço */}
-        <div>
-          <label className={labelBaseClass}>Faixa de Preço</label>
-          <div className="mt-1 grid grid-cols-2 gap-3">
-            <div>
-              <input
-                type="text"
+        <Box>
+          <Typography fontWeight={400} variant="body2" color="text.primary" sx={{ mb: 1 }}>
+            Faixa de Preço
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                fullWidth
                 id="priceMin"
                 name="priceMin"
                 value={localPriceMin}
                 onChange={handlePriceInputChange}
                 placeholder="Mín R$"
-                className={`${inputBaseClass} text-center`}
+                size="small"
+                variant="outlined"
+                inputProps={{ style: { textAlign: 'center' } }}
               />
-            </div>
-            <div>
-              <input
-                type="text"
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                fullWidth
                 id="priceMax"
                 name="priceMax"
                 value={localPriceMax}
                 onChange={handlePriceInputChange}
                 placeholder="Máx R$"
-                className={`${inputBaseClass} text-center`}
+                size="small"
+                variant="outlined"
+                inputProps={{ style: { textAlign: 'center' } }}
               />
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
 
         {/* Select: Capacidade */}
-        <div>
-          <label htmlFor="capacity" className={labelBaseClass}>Capacidade (Pessoas)</label>
-          <select
-            id="capacity"
-            name="capacity"
-            value={localCapacity}
-            onChange={handleSelectChange}
-            className={inputBaseClass}
-          >
-            <option value="">Qualquer</option>
-            <option value="1">1 Pessoa</option>
-            <option value="2">2 Pessoas</option>
-            <option value="3">3 Pessoas</option>
-            <option value="4">4 Pessoas</option>
-            <option value="5">5 Pessoas</option>
-            <option value="6">6 Pessoas</option>
-            <option value="7">6+ Pessoas</option>
-          </select>
-        </div>
+        <Box>
+          <FormControl fullWidth size="small">
+            <InputLabel id="capacity-label">Capacidade (Pessoas)</InputLabel>
+            <Select
+              labelId="capacity-label"
+              id="capacity"
+              name="capacity"
+              value={localCapacity}
+              label="Capacidade (Pessoas)"
+              onChange={(e) => {
+                const event = {
+                  target: {
+                    name: 'capacity',
+                    value: e.target.value
+                  }
+                } as React.ChangeEvent<HTMLSelectElement>;
+                handleSelectChange(event);
+              }}
+            >
+              <MenuItem value="">Qualquer</MenuItem>
+              <MenuItem value="1">1 Pessoa</MenuItem>
+              <MenuItem value="2">2 Pessoas</MenuItem>
+              <MenuItem value="3">3 Pessoas</MenuItem>
+              <MenuItem value="4">4 Pessoas</MenuItem>
+              <MenuItem value="5">5 Pessoas</MenuItem>
+              <MenuItem value="6+">6+ Pessoas</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
 
         {/* Checkboxes: Características */}
-        <div>
-          <label className={`${labelBaseClass} mb-1`}>Características</label>
-          <div className="mt-2 space-y-3">
+        <Box>
+          <Typography fontWeight={400} variant="body2" color="text.primary" sx={{ mb: 1 }}>
+            Características
+          </Typography>
+          <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
             {Object.entries(availableFeatures).map(([key, label]) => (
-              <label key={key} htmlFor={`feature-${key}`} className="flex items-center space-x-2 cursor-pointer group">
-                <input
-                  id={`feature-${key}`}
-                  name={key}
-                  type="checkbox"
-                  checked={localFeatures[key as keyof FilterState['features']] || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded group-hover:border-indigo-400 transition-colors"
-                />
-                <span className="text-sm text-slate-700 group-hover:text-indigo-600 transition-colors">
-                  {label}
-                </span>
-              </label>
+              <FormControlLabel
+                key={key}
+                control={
+                  <Checkbox
+                    checked={localFeatures[key] || false}
+                    onChange={handleCheckboxChange}
+                    name={key}
+                    size="small"
+                    color="primary"
+                  />
+                }
+                label={<Typography variant="body2">{label}</Typography>}
+              />
             ))}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 
