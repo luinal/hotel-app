@@ -14,34 +14,12 @@ const port = process.env.PORT || 5000; // Alterado para 5000 para corresponder a
 // Middleware para parsing de JSON
 app.use(express.json());
 
-// Configurar CORS para permitir requisições de múltiplas origens
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:8080',
-  'https://hotel-app-frontend.onrender.com',
-  'https://hotel-app-backend.onrender.com',
-  process.env.FRONTEND_URL
-].filter(Boolean);
-
-// Opção mais permissiva para CORS em ambiente de produção
-if (process.env.NODE_ENV === 'production') {
-  // Em produção, usar CORS simples que aceita qualquer origem
-  app.use(cors());
-} else {
-  // Em desenvolvimento, usar CORS com verificação de origem
-  app.use(cors({
-    origin: function(origin, callback) {
-      // Permitir requisições sem origin (como mobile apps ou curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        console.log('Origem bloqueada pelo CORS:', origin);
-        callback(new Error('Bloqueado pelo CORS'));
-      }
-    }
-  }));
-}
+// Configurar CORS para permitir requisições de qualquer origem
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Servir arquivos estáticos da pasta 'public'
 app.use(express.static('public'));
